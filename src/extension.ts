@@ -36,7 +36,7 @@ const replacer = ((quoteChar: string, padString: string, match: string, identifi
 });
 
 export function activate(context: vscode.ExtensionContext) {
-    const disposable = vscode.commands.registerCommand('extension.addEtags', () => {      
+    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => {      
         const editor = vscode.window.activeTextEditor;
 
         if (editor) {
@@ -50,9 +50,38 @@ export function activate(context: vscode.ExtensionContext) {
 				editBuilder.replace(new vscode.Range(0, 0, document.lineCount, 0), text);
 			});
         }
-    });
+    }));
 
-    context.subscriptions.push(disposable);
+    context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
+        const editor = vscode.window.activeTextEditor;
+
+        if (editor) {
+            const document = editor.document;
+            const text = document.getText();
+            const etag = args['etag'];
+
+            if (etag) {
+                const index = text.indexOf(etag);
+
+                if (index !== -1) {
+                    const start = document.positionAt(index);
+                    const end = document.positionAt(index + etag.length);
+                    editor.selection = new vscode.Selection(start, end);
+                    editor.revealRange(new vscode.Range(start, end));
+                } else {
+                    vscode.window.showInformationMessage('Etag not found.');
+                }
+            }
+        }
+    }));
+
+    context.subscriptions.push(vscode.window.registerUriHandler({
+        handleUri(uri: vscode.Uri) {
+            const params = new URLSearchParams(uri.query);
+            const data = Object.fromEntries(params.entries());
+            vscode.commands.executeCommand("extension.findEtag", data);
+        }
+    }));
 }
 
 export function deactivate() {}

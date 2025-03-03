@@ -2,20 +2,28 @@
   "name": "ty-levels",
   "displayName": "ty-levels",
   "description": "Avara level editing enhancements for VS Code.",
-  "version": "0.0.1",
+  "publisher": "skedastik",
+  "repository": "https://github.com/skedastik/vscode-ty-levels",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.97.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onUri"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "extension.addEtags",
         "title": "Add Etags to Solids"
+      },
+      {
+        "command": "extension.findEtag",
+        "title": "Find Etag"
       }
     ]
   },

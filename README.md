@@ -9,3 +9,9 @@ Hit `Cmd-Shift-P` and begin typing any of the commands below. Hit `Enter` when t
 ### `Add Etags to Solids`
 
 Add etags to untagged solids (Walls, Ramps, WallDoors etc.).
+
+## External commands
+
+### `Find Etag`
+
+This command is triggered by Avara's `/find` TUI command. It highlights the target etag in your open document.
