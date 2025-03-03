@@ -1,7 +1,11 @@
 # vscode-ty-levels
 
-Add etags to your solids (Walls, Ramps, WallDoors etc.) with a single command.
+A Visual Studio Code extension for editing Avara levels.
 
-## `Add Etags to Solids`
+## Commands
 
-Hit `Cmd-Shift-P` and begin typing "add etags to solids". Hit `Enter` once the command appears. Your untagged solids are now tagged.
+Hit `Cmd-Shift-P` and begin typing any of the commands below. Hit `Enter` when the command appears to execute it.
+
+### `Add Etags to Solids`
+
+Add etags to untagged solids (Walls, Ramps, WallDoors etc.).
