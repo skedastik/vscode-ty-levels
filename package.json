@@ -9,12 +9,15 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-      "onStartupFinished"
-  ],
+  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": []
+    "commands": [
+      {
+        "command": "extension.addEtags",
+        "title": "Add Etags to Solids"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

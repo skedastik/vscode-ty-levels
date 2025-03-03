@@ -1,3 +1,5 @@
 # vscode-ty-levels
 
-Visual Studio Code extension that automatically adds etags to solids (Walls, Ramps, WallDoors etc.) in your .alf files on save.
+Add etags to your solids (Walls, Ramps, WallDoors etc.) with a single command:
+
+Hit `Cmd-Shift-P` and begin typing `add etags to solids`. Hit `Enter` once the command appears. Your untagged solids are now tagged.

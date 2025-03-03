@@ -36,24 +36,20 @@ const replacer = ((quoteChar: string, padString: string, match: string, identifi
 });
 
 export function activate(context: vscode.ExtensionContext) {
+    const disposable = vscode.commands.registerCommand('extension.addEtags', () => {      
+        const editor = vscode.window.activeTextEditor;
 
-    const disposable = vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {        
-        const document = event.document;
-        const fileExtension = path.extname(document.fileName);
+        if (editor) {
+            const document = editor.document;
 
-        if (fileExtension !== '.alf') {
-            return;
+            const text = document.getText()
+                .replace(/<(Wall|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, replacer.bind(null, '"', ' '))
+                .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/sg, replacer.bind(null, "'", ', '));
+
+            editor.edit(editBuilder => {
+				editBuilder.replace(new vscode.Range(0, 0, document.lineCount, 0), text);
+			});
         }
-
-        const text = document.getText()
-            .replace(/<(Wall|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, replacer.bind(null, '"', ' '))
-            .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/sg, replacer.bind(null, "'", ', '));
-        
-        // console.log(text);
-
-        const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), text);
-
-        event.waitUntil(Promise.resolve([textEdit]));
     });
 
     context.subscriptions.push(disposable);
