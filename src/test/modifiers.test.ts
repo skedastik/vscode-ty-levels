@@ -1,11 +1,11 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
-import * as mod from '../text-modifiers';
+import * as mod from '../modifiers';
 
 let randomStub: sinon.SinonStub;
 
-suite('Text Modifiers Test Suite', () => {
+suite('Modifiers Test Suite', () => {
     setup(function () {
         randomStub = sinon.stub(Math, 'random');
     });

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as mod from './text-modifiers';
+import * as mod from './modifiers';
 
 // Modify the currently selected text or the entire document if no text is selected.
 const modifySelection = (modifier: mod.stringModifier) => {
