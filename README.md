@@ -6,9 +6,9 @@ A Visual Studio Code extension for editing Avara levels.
 
 Hit `Cmd-Shift-P` and begin typing any of the commands below. Hit `Enter` when the command appears to execute it.
 
-### `Auto Tag`
+### `Toggle Auto Tag`
 
-Add "autotag" comment to top of file, enabling automatic etag creation on save.
+Enable or disable automatic etag creation on save. This adds an "autotag" comment to the top of your file when enabled.
 
 ### `Add Etags`
 

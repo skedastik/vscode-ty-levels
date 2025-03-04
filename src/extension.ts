@@ -4,9 +4,8 @@
 // Python listener that opens VSCode URI (i.e.: vscode://extension.id/action)?
 
 import * as vscode from 'vscode';
-import * as path from 'path';
 
-const ETAG_LENGTH = 6;
+const ETAG_LENGTH = 7;
 
 const AUTOTAG_STRING = 'autotag';
 const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
@@ -43,16 +42,15 @@ const addEtags = (text: string) => text
     .replace(/<(Wall|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, addEtagsReplacer.bind(null, '"', ' '))
     .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/g, addEtagsReplacer.bind(null, "'", ', '));
 
-    
 const removeEtags = (text: string) => text
-    .replace(/((\()\s*?etag\s*?=\s*?["'].*?["']\s*?,?\s*|,\s*?etag\s*?=\s*?["'].*?["'])/g, '$2')
-    .replace(/(\s)etag\s*=["'].*?["'] ?/sg, '$1');
+    .replace(/((\()\s*?etag\s*?=\s*?["'].*?["']\s*?,?\s*|,\s*?etag\s*?=\s*?["'][^{}]*?["'])/g, '$2')
+    .replace(/(\s)etag\s*=["'][^{}]*?["'] ?/sg, '$1');
 
 const regenerateEtagsReplacer = (match: string, g1: string, g2: string) => [g1, generateEtag(), g2].join('');
 
-const regenerateEtags = (text: string) => text.replace(/([\s\()]etag\s*?=\s*?["']).*?(["'])/g, regenerateEtagsReplacer);
+const regenerateEtags = (text: string) => text.replace(/([\s\()]etag\s*?=\s*?["'])[^{}]*?(["'])/g, regenerateEtagsReplacer);
 
-const addAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text) ? text : [AUTOTAG_COMMENT, text].join('\n');
+const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text) ? text.substring(text.indexOf('\n') + 1, text.length) : [AUTOTAG_COMMENT, text].join('\n');
 
 type stringModifier = (s: string) => string;
 
@@ -156,7 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
     
-    context.subscriptions.push(vscode.commands.registerCommand('extension.autoTag', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('extension.toggleAutoTag', () => {
         const editor = vscode.window.activeTextEditor;
 
         if (!editor) {
@@ -165,10 +163,18 @@ export function activate(context: vscode.ExtensionContext) {
 
         const document = editor.document;
         const range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
-        const text = document.getText();
+        let text = document.getText();
+
+        text = toggleAutoTagComment(text);
+        if (AUTOTAG_REGEX.test(text)) {
+            text = addEtags(text);
+            vscode.window.showInformationMessage('Autotag enabled.');
+        } else {
+            vscode.window.showInformationMessage('Autotag disabled.');
+        }
 
         editor.edit(editBuilder => {
-            editBuilder.replace(range, addEtags(addAutoTagComment(text)));
+            editBuilder.replace(range, text);
         });
     }));
 }

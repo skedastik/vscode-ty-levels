@@ -4,7 +4,7 @@
   "description": "Avara level editing enhancements for VS Code.",
   "publisher": "skedastik",
   "repository": "https://github.com/skedastik/vscode-ty-levels",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -35,8 +35,8 @@
         "title": "Paste with New Etags"
       },
       {
-        "command": "extension.autoTag",
-        "title": "Auto Tag"
+        "command": "extension.toggleAutoTag",
+        "title": "Toggle Auto Tag"
       },
       {
         "command": "extension.findEtag",
