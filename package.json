@@ -4,7 +4,7 @@
   "description": "Avara level editing enhancements for VS Code.",
   "publisher": "skedastik",
   "repository": "https://github.com/skedastik/vscode-ty-levels",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -19,7 +19,15 @@
     "commands": [
       {
         "command": "extension.addEtags",
-        "title": "Add Etags to Solids"
+        "title": "Add Etags"
+      },
+      {
+        "command": "extension.removeEtags",
+        "title": "Remove Etags"
+      },
+      {
+        "command": "extension.pasteWithNewEtags",
+        "title": "Paste with New Etags"
       },
       {
         "command": "extension.findEtag",

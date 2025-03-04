@@ -17,7 +17,7 @@ const generateEtag = () => {
     return chars.join('');
 };
 
-const replacer = ((quoteChar: string, padString: string, match: string, identifier: string, precedingParams: string, closingDelimiter: string) => {
+const addEtagsReplacer = ((quoteChar: string, padString: string, match: string, identifier: string, precedingParams: string, closingDelimiter: string) => {
     const offset = closingDelimiter.length;
 
     if (!/[ \(]etag\s*=/.test(match)) {
@@ -35,52 +35,93 @@ const replacer = ((quoteChar: string, padString: string, match: string, identifi
     return match;
 });
 
+const addEtags = (text: string) => text
+    .replace(/<(Wall|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, addEtagsReplacer.bind(null, '"', ' '))
+    .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/g, addEtagsReplacer.bind(null, "'", ', '));
+
+    
+const removeEtags = (text: string) => text
+    .replace(/((\()\s*?etag\s*?=\s*?["'].*?["']\s*?,?\s*|,\s*?etag\s*?=\s*?["'].*?["'])/g, '$2')
+    .replace(/(\s)etag\s*=["'].*?["'] ?/sg, '$1');
+
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => {      
         const editor = vscode.window.activeTextEditor;
 
-        if (editor) {
-            const document = editor.document;
-
-            const text = document.getText()
-                .replace(/<(Wall|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, replacer.bind(null, '"', ' '))
-                .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/sg, replacer.bind(null, "'", ', '));
-
-            editor.edit(editBuilder => {
-				editBuilder.replace(new vscode.Range(0, 0, document.lineCount, 0), text);
-			});
+        if (!editor) {
+            return;
         }
+
+        const document = editor.document;
+        const text = addEtags(document.getText());
+        
+        editor.edit(editBuilder => {
+            editBuilder.replace(new vscode.Range(0, 0, document.lineCount, 0), text);
+        });
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => {      
+        const editor = vscode.window.activeTextEditor;
+
+        if (!editor) {
+            return;
+        }
+
+        const document = editor.document;
+        const text = removeEtags(document.getText());
+        
+        editor.edit(editBuilder => {
+            editBuilder.replace(new vscode.Range(0, 0, document.lineCount, 0), text);
+        });
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
         const editor = vscode.window.activeTextEditor;
 
-        if (editor) {
-            const document = editor.document;
-            const text = document.getText();
-            const etag = args['etag'];
+        if (!editor) {
+            return;
+        }
 
-            if (etag) {
-                const index = text.indexOf(etag);
+        const document = editor.document;
+        const text = document.getText();
+        const etag = args['etag'];
 
-                if (index !== -1) {
-                    const start = document.positionAt(index);
-                    const end = document.positionAt(index + etag.length);
-                    editor.selection = new vscode.Selection(start, end);
-                    editor.revealRange(new vscode.Range(start, end));
-                } else {
-                    vscode.window.showInformationMessage('Etag not found.');
-                }
-            }
+        if (!etag) {
+            return;
+        }
+
+        const index = text.indexOf(etag);
+
+        if (index !== -1) {
+            const start = document.positionAt(index);
+            const end = document.positionAt(index + etag.length);
+            editor.selection = new vscode.Selection(start, end);
+            editor.revealRange(new vscode.Range(start, end));
+        } else {
+            vscode.window.showInformationMessage('Etag not found.');
         }
     }));
-
     context.subscriptions.push(vscode.window.registerUriHandler({
         handleUri(uri: vscode.Uri) {
             const params = new URLSearchParams(uri.query);
             const data = Object.fromEntries(params.entries());
             vscode.commands.executeCommand("extension.findEtag", data);
         }
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.pasteWithNewEtags', async () => {
+        const editor = vscode.window.activeTextEditor;
+
+        if (!editor) {
+            return;
+        }
+
+        const clipboardText = await vscode.env.clipboard.readText();
+        const text = addEtags(removeEtags(clipboardText));
+
+        editor.edit(editBuilder => {
+            editBuilder.replace(editor.selection, text);
+        });
     }));
 }
 
