@@ -1,8 +1,3 @@
-// Automatically add etags to Walls, WallDoors, and Ramps.
-
-// [TODO] Implement `/find` TUI command in Avara editing tools by singalling
-// Python listener that opens VSCode URI (i.e.: vscode://extension.id/action)?
-
 import * as vscode from 'vscode';
 
 const ETAG_LENGTH = 7;
