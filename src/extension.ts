@@ -8,6 +8,10 @@ import * as path from 'path';
 
 const ETAG_LENGTH = 6;
 
+const AUTOTAG_STRING = 'autotag';
+const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
+const AUTOTAG_REGEX = new RegExp(`^\\s*<!--\\s+${AUTOTAG_STRING}\\s+-->`);
+
 const generateEtag = () => {
     const chars = [];
     for (let i = 0; i < ETAG_LENGTH; i++) {
@@ -47,6 +51,8 @@ const removeEtags = (text: string) => text
 const regenerateEtagsReplacer = (match: string, g1: string, g2: string) => [g1, generateEtag(), g2].join('');
 
 const regenerateEtags = (text: string) => text.replace(/([\s\()]etag\s*?=\s*?["']).*?(["'])/g, regenerateEtagsReplacer);
+
+const addAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text) ? text : [AUTOTAG_COMMENT, text].join('\n');
 
 type stringModifier = (s: string) => string;
 
@@ -131,6 +137,39 @@ export function activate(context: vscode.ExtensionContext) {
     }));
     context.subscriptions.push(vscode.commands.registerCommand('editor.action.clipboardPasteAction', () => {
         vscode.commands.executeCommand('extension.pasteWithNewEtags');
+    }));
+ 
+    context.subscriptions.push(vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
+        const editor = vscode.window.activeTextEditor;
+        
+        if (!editor) {
+            return;
+        }
+
+        const document = editor.document;
+        const firstLine = document.lineAt(0).text;
+
+        if (AUTOTAG_REGEX.test(firstLine)) {
+            const text = document.getText();
+            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), addEtags(text));
+            event.waitUntil(Promise.resolve([textEdit]));   
+        }
+    }));
+    
+    context.subscriptions.push(vscode.commands.registerCommand('extension.autoTag', () => {
+        const editor = vscode.window.activeTextEditor;
+
+        if (!editor) {
+            return;
+        }
+
+        const document = editor.document;
+        const range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
+        const text = document.getText();
+
+        editor.edit(editBuilder => {
+            editBuilder.replace(range, addEtags(addAutoTagComment(text)));
+        });
     }));
 }
 
