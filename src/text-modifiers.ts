@@ -15,7 +15,14 @@ const generateEtag = () => {
     return chars.join('');
 };
 
-const addEtagsReplacer = (quoteChar: string, padString: string, match: string, identifier: string, precedingParams: string, closingDelimiter: string) => {
+const addEtagsReplacer = (
+    quoteChar: string,
+    padString: string,
+    match: string,
+    identifier: string,
+    precedingParams: string,
+    closingDelimiter: string
+) => {
     const offset = closingDelimiter.length;
 
     if (!/[\s\(]etag\s*=/.test(match)) {
@@ -34,7 +41,7 @@ const addEtagsReplacer = (quoteChar: string, padString: string, match: string, i
 };
 
 export const addEtags = (text: string) => text
-    .replace(/<(Wall|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, addEtagsReplacer.bind(null, '"', ' '))
+    .replace(/<(Wall[^DS]|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, addEtagsReplacer.bind(null, '"', ' '))
     .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/g, addEtagsReplacer.bind(null, "'", ', '));
 
 export const removeEtags = (text: string) => text
