@@ -14,9 +14,13 @@ Add etags to untagged solids (Walls, Ramps, WallDoors etc.).
 
 Remove etags.
 
+### `Regenerate Etags`
+
+Regenerate existing etags.
+
 ### `Paste with New Etags`
 
-Paste from clipboard, automatically generating new etags.
+Paste from clipboard, automatically regenerating existing etags.
 
 ## External commands
 
