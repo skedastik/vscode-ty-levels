@@ -1,0 +1,61 @@
+<Wall etag="0000000"/>
+<Ramp etag="0000000"/>
+<WallDoor etag="0000000"/>
+<WallSolid etag="0000000"/>
+<FreeSolid etag="0000000"/>
+<Solid etag="0000000"/>
+
+<Wall foo="bar" etag="0000000" />
+<Wall etag="existingTag" />
+<Wall etag="existingTag" foo="bar" />
+<Wall foo="bar" etag="existingTag" />
+<Wall foo="bar" etag="existingTag" baz="qux" />
+
+<Wall etag="{{ expression }}" />
+
+<Wall
+    foo="bar" etag="0000000"
+/>
+<Wall
+    etag="existingTag"
+    foo="bar"
+/>
+<Wall
+    foo="bar"
+    etag="existingTag"
+/>
+<Wall
+    foo="bar"
+    etag="existingTag"
+    baz="qux"
+/>
+<Wall
+    etag="existingTag" foo="bar"
+/>
+<Wall
+    foo="bar" etag="existingTag"
+/>
+<Wall
+    foo="bar" etag="existingTag" baz="qux"
+/>
+
+<NotASolid />
+<NotASolid etag="existingTag" />
+
+<Wall etag='existingTagInSingleQuotes' />
+
+<Wall fakeetag="fakeExistingTag" etag="0000000" />
+
+{{ wall(etag='0000000') }}
+{{ ramp(etag='0000000') }}
+
+{{ wall(foo='bar', etag='0000000') }}
+{{ wall(etag='existingTag') }}
+{{ wall(etag='existingTag', foo='bar') }}
+{{ wall(foo='bar', etag='existingTag') }}
+{{ wall(foo='bar', etag='existingTag', baz='qux') }}
+
+{{ wall(etag=expression) }}
+
+{{ irrelevantMacro() }}
+{{ irrelevantMacro(etag='existingTag') }}

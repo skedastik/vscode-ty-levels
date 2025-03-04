@@ -1,0 +1,62 @@
+<!-- autotag -->
+<Wall />
+<Ramp />
+<WallDoor />
+<WallSolid />
+<FreeSolid />
+<Solid />
+
+<Wall foo="bar" />
+<Wall etag="existingTag" />
+<Wall etag="existingTag" foo="bar" />
+<Wall foo="bar" etag="existingTag" />
+<Wall foo="bar" etag="existingTag" baz="qux" />
+
+<Wall etag="{{ expression }}" />
+
+<Wall
+    foo="bar"
+/>
+<Wall
+    etag="existingTag"
+    foo="bar"
+/>
+<Wall
+    foo="bar"
+    etag="existingTag"
+/>
+<Wall
+    foo="bar"
+    etag="existingTag"
+    baz="qux"
+/>
+<Wall
+    etag="existingTag" foo="bar"
+/>
+<Wall
+    foo="bar" etag="existingTag"
+/>
+<Wall
+    foo="bar" etag="existingTag" baz="qux"
+/>
+
+<NotASolid />
+<NotASolid etag="existingTag" />
+
+<Wall etag='existingTagInSingleQuotes' />
+
+<Wall fakeetag="fakeExistingTag" />
+
+{{ wall() }}
+{{ ramp() }}
+
+{{ wall(foo='bar') }}
+{{ wall(etag='existingTag') }}
+{{ wall(etag='existingTag', foo='bar') }}
+{{ wall(foo='bar', etag='existingTag') }}
+{{ wall(foo='bar', etag='existingTag', baz='qux') }}
+
+{{ wall(etag=expression) }}
+
+{{ irrelevantMacro() }}
+{{ irrelevantMacro(etag='existingTag') }}

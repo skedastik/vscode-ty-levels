@@ -1,0 +1,61 @@
+<Wall />
+<Ramp />
+<WallDoor />
+<WallSolid />
+<FreeSolid />
+<Solid />
+
+<Wall foo="bar" />
+<Wall />
+<Wall foo="bar" />
+<Wall foo="bar" />
+<Wall foo="bar" baz="qux" />
+
+<Wall etag="{{ expression }}" />
+
+<Wall
+    foo="bar"
+/>
+<Wall
+    
+    foo="bar"
+/>
+<Wall
+    foo="bar"
+    
+/>
+<Wall
+    foo="bar"
+    
+    baz="qux"
+/>
+<Wall
+    foo="bar"
+/>
+<Wall
+    foo="bar" 
+/>
+<Wall
+    foo="bar" baz="qux"
+/>
+
+<NotASolid />
+<NotASolid />
+
+<Wall />
+
+<Wall fakeetag="fakeExistingTag" />
+
+{{ wall() }}
+{{ ramp() }}
+
+{{ wall(foo='bar') }}
+{{ wall() }}
+{{ wall(foo='bar') }}
+{{ wall(foo='bar') }}
+{{ wall(foo='bar', baz='qux') }}
+
+{{ wall(etag=expression) }}
+
+{{ irrelevantMacro() }}
+{{ irrelevantMacro() }}
