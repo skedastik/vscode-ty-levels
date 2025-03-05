@@ -2,6 +2,7 @@
 {{ foo() }}
 
 <Foo irrelevant="" />
+<Foo irrelevant="fn(2) + fn(2)" />
 {{ foo(irrelevant='') }}
 
 <Foo x="" />
@@ -15,6 +16,10 @@
 {{ foo(cx=0, cz=0, x=0, y=0, z=0, xx=0, yy=0, zz=0, w=0, d=0, h=0, deltaY=0) }}
 
 <Foo x="{{ x }}" />
+<Foo x="x + x" />
+<Foo x="x + sin(x)" />
+<Foo x="sin(x) + sin(x)" />
+<Foo x="math.cos(x) + 3 + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + function() + function() + tokens()" />
 {{ foo(x=x) }}
 
 <Foo x="{{ x }}" y="{{ y }}" />
@@ -27,6 +32,7 @@
 {{ foo(x = 2 * x + 14, y = 4) }}
 
 <Foo x="{{ math.cos(x) }}" />
+<Foo x="{{ math.cos(x)-math.cos(x) }}" />
 <Foo x="{{ math.cos(x) + 3 + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + function() + function() + tokens() }}" />
 {{ foo(x=math.cos(x)) }}
 {{ foo(x=math.cos(x), a=0) }}

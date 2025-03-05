@@ -62,7 +62,7 @@ suite('Modifiers Test Suite', () => {
     test('translateX', () => {
         const expr = '1';
         const input = fs.readFileSync('src/test/fixtures/transformations.alf', 'utf-8');
-        const expected = fs.readFileSync('src/test/fixtures/transformations.translateX.expected.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transformations.translateX.plus1.expected.alf', 'utf-8');
         assert.strictEqual(mod.translateX(expr, input), expected);
     });
 
@@ -70,6 +70,13 @@ suite('Modifiers Test Suite', () => {
         const expr = 'math.cos(45) + cos(45) + fn(baz)';
         const input = '<Foo x="{{ 10 }}"';
         const expected = '<Foo x="{{ math.cos(45) + cos(45) + fn(baz) + 10 }}"';
+        assert.strictEqual(mod.translateX(expr, input), expected);
+    });
+
+    test('translateX with expression containing function already in attribute', () => {
+        const expr = '-cos(a)';
+        const input = '<Foo x="{{ cos(a) }}"';
+        const expected = '<Foo x="{{ 0 }}"';
         assert.strictEqual(mod.translateX(expr, input), expected);
     });
 });

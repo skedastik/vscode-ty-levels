@@ -1,4 +1,5 @@
 const math = require('mathjs');
+const crypto = require('crypto');
 
 const ETAG_LENGTH = 7;
 
@@ -62,64 +63,65 @@ export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
     ? text.substring(text.indexOf('\n') + 1, text.length)
     : [AUTOTAG_COMMENT, text].join('\n');
 
-type symbolsToFuncArray = { [key: string]: string };
-class EncodedExpression {
-    encodedExpr: string;
-    symbolsToFuncs: symbolsToFuncArray;
+type symbolsToFuncMap = { [key: string]: string };
+class ExpressionEncoder {
+    symbolsToFuncs: symbolsToFuncMap;
 
-    static funcId: number;
+    static FUNC_REGEX = new RegExp('[a-zA-Z_][a-zA-Z0-9_\\.]*\\(.*?\\)+', 'g');
+    static SYMBOL_PREFIX = 'sym_';
+    static SYMBOL_REGEX = new RegExp(`${ExpressionEncoder.SYMBOL_PREFIX}([0-9a-f]+)`, 'g');
 
-    static FUNC_REGEX = new RegExp('[^\\s]+\\([^\\(\\)]*\\)+', 'g');
-    static SYMBOL_PREFIX = '__s_y_m__';
-    static SYMBOL_REGEX = new RegExp(`${EncodedExpression.SYMBOL_PREFIX}([0-9]+)`, 'g');
-
-    constructor(expr: string) {
-        EncodedExpression.funcId = 0;
+    constructor() {
         this.symbolsToFuncs = {};
-        this.encodedExpr = expr.replace(EncodedExpression.FUNC_REGEX, (func: string) => {
-            const symbolName: string = `${EncodedExpression.SYMBOL_PREFIX}${EncodedExpression.funcId++}`;
+    }
+
+    // Replace all function tokens in expression as mathjs will evaluate
+    // functions (by design). There is a "clean" way to stop mathjs from doing
+    // this by passing custom rules to math.simplify, but it's *very*
+    // nontrivial.
+    encode(expr: string) {
+        const encodedExpr = expr.replace(ExpressionEncoder.FUNC_REGEX, (func: string) => {
+            // Use a hash so that identical strings map to the same symbol. This
+            // is not perfect since different string representations could be
+            // algebraically equivalent, but it should cover most use cases.
+            const id = crypto.createHash('md5').update(func).digest('hex');
+            const symbolName: string = `${ExpressionEncoder.SYMBOL_PREFIX}${id}`;
             this.symbolsToFuncs[symbolName] = func;
             return symbolName;
         });
-    }
-
-    get() {
-        return this.encodedExpr;
+        return encodedExpr;
     }
     
+    // Restore function tokens in passed expression.
     decode(expr: string) {
-        // Restore function tokens in passed expression.
-        return expr.replace(
-            EncodedExpression.SYMBOL_REGEX,
-            (match: string, symbolNumber: string) => {
-                const symbol = `${EncodedExpression.SYMBOL_PREFIX}${symbolNumber}`;
+        const decodedExpr = expr.replace(
+            ExpressionEncoder.SYMBOL_REGEX,
+            (match: string, id: string) => {
+                const symbol = `${ExpressionEncoder.SYMBOL_PREFIX}${id}`;
                 const func = this.symbolsToFuncs[symbol];
                 if (func === undefined) {
-                    // symbol was encoded by a different EncodedExpression, so leave it as is
-                    return symbol;
+                    throw new Error(`ExpressionEncoder.decode encountered unrecognized symbol "${symbol}".`);
                 }
                 return func;
             }
         );
+        return decodedExpr;
     }
 }
 
-const transformReplacer = (transformExpr: string, match: string, t1: string, alt: string, expr: string, t2: string) => {
-    // Temporarily replace all function tokens in expression before passing to
-    // math.simplify, as mathjs will munge function names (by design). There is
-    // a "clean" way of doing this by passing custom rules to math.simplify, but
-    // it's *very* nontrivial.
-    let encodedExpr = new EncodedExpression(expr);
+const transformReplacer = (encoder: ExpressionEncoder, transformExpr: string, match: string, t1: string, alt: string, expr: string, t2: string) => {
+    
+    let encodedExpr = encoder.encode(expr);
 
     // Simplify the expression.
     const simplifiedExpr = [
         t1,
-        math.simplify(`(${encodedExpr.get()} + ${transformExpr})`, {}, { exactFractions: false }).toString(),
+        math.simplify(`(${encodedExpr} + ${transformExpr})`, {}, { exactFractions: false }).toString(),
         t2
     ].join('');
 
     // Restore function tokens in simplified expression.
-    return encodedExpr.decode(simplifiedExpr);
+    return simplifiedExpr;
 };
 
 const countChar = (str: string, char: string) => {
@@ -133,12 +135,13 @@ const countChar = (str: string, char: string) => {
 };
 
 export const translateX = (transformExpr: string, text: string) => {
-    const encodedTransformExpr = new EncodedExpression(transformExpr);
+    const encoder = new ExpressionEncoder();
+    const encodedTransformExpr = encoder.encode(transformExpr);
     const transformedText = text
         // normal XML attributes (i.e. `x="25"`)
-        .replace(/([\s"'](cx|x|xx)\s*=\s*["']\s*)([^"'\{\}]+?)(\s*["'])/g, transformReplacer.bind(null, encodedTransformExpr.get()))
+        .replace(/([\s"'](cx|x|xx)\s*=\s*["']\s*)([^"'\{\}]+?)(\s*["'])/g, transformReplacer.bind(null, encoder, encodedTransformExpr))
         // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
-        .replace(/([\s"'](cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, transformReplacer.bind(null, encodedTransformExpr.get()))
+        .replace(/([\s"'](cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, transformReplacer.bind(null, encoder, encodedTransformExpr))
         // Jinja macro parameters (i.e. x=foo+25)
         .replace(/([\s"',\(](cx|x|xx)\s*=\s*)([^"',\}]+)/g, (match: string, t1: string, alt: string, expr: string) => {
             // In the case where the expression is last in an argument list, the
@@ -151,7 +154,7 @@ export const translateX = (transformExpr: string, text: string) => {
                 t2 = expr.substring(tokenStart, expr.length);
                 expr = expr.substring(0, tokenStart);
             }
-            return transformReplacer(encodedTransformExpr.get(), match, t1, alt, expr, t2);
+            return transformReplacer(encoder, encodedTransformExpr, match, t1, alt, expr, t2);
         });
-    return encodedTransformExpr.decode(transformedText);
+    return encoder.decode(transformedText);
 };

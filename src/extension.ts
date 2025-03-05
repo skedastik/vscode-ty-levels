@@ -127,7 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => {
         const expr = await vscode.window.showInputBox({
-            prompt: 'Enter translation expression (e.g. "-2" or "myVar" or "2 * math.cos(foo).")',
+            prompt: 'Enter translation expression (e.g. "-2")',
             placeHolder: '0'
         });
         if (expr === undefined) {
