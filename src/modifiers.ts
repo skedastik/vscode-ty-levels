@@ -1,3 +1,5 @@
+const math = require('mathjs');
+
 const ETAG_LENGTH = 7;
 
 const AUTOTAG_STRING = 'autotag';
@@ -53,6 +55,43 @@ export const removeEtags = (text: string) => text
 
 const regenerateEtagsReplacer = (match: string, g1: string, g2: string) => [g1, generateEtag(), g2].join('');
 
-export const regenerateEtags = (text: string) => text.replace(/([\s\()]etag\s*=\s*["'])[^{}]*?(["'])/g, regenerateEtagsReplacer);
+export const regenerateEtags = (text: string) => text
+    .replace(/([\s\()]etag\s*=\s*["'])[^{}]*?(["'])/g, regenerateEtagsReplacer);
 
-export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text) ? text.substring(text.indexOf('\n') + 1, text.length) : [AUTOTAG_COMMENT, text].join('\n');
+export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
+    ? text.substring(text.indexOf('\n') + 1, text.length)
+    : [AUTOTAG_COMMENT, text].join('\n');
+
+type symbolsToFuncArray = { [key: string]: string };
+
+const FUNC_REGEX = new RegExp('[^\\s]+\\([^\\(\\)]*\\)', 'g');
+const SYMBOL_PREFIX = '__s_y_m__';
+const SYMBOL_REGEX = new RegExp(`${SYMBOL_PREFIX}([0-9]+)`, 'g');
+
+export const translateX = (text: string, translateExpr: string) => text
+    .replace(/((cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, (match, t1, alt, expr, t2) => {
+
+        // Temporarily replace all function tokens in expression before passing
+        // to math.simplify, as mathjs will munge function names.
+        let funcCount = 0;
+        const symbolsToFuncs: symbolsToFuncArray = {};
+        console.log('* * *');
+        expr = expr.replace(FUNC_REGEX, (func: string) => {
+            const symbolName: string = `${SYMBOL_PREFIX}${funcCount}`;
+            symbolsToFuncs[symbolName] = func;
+            console.log(func, symbolName);
+            return symbolName;
+        });
+        console.log(expr);
+        console.log('* * *');
+
+        // Simplify the expression.
+        expr = [
+            t1,
+            math.simplify(`(${expr} + ${translateExpr})`, {}, { exactFractions: false }).toString(),
+            t2
+        ].join('');
+
+        // Restore function tokens in expression.
+        return expr.replace(SYMBOL_REGEX, (match: string, symbolNumber: string) => symbolsToFuncs[`${SYMBOL_PREFIX}${symbolNumber}`]);
+    });

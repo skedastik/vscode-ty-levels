@@ -1,0 +1,38 @@
+<Foo />
+foo()
+
+<Foo x="" />
+foo(x='')
+
+<Foo cx="1" cz="0" x="1" y="0" z="0" xx="1" yy="0" zz="0" w="0" d="0" h="0" deltaY="0" />
+foo(cx=1, cz=0, x=1, y=0, z=0, xx=1, yy=0, zz=0, w=0, d=0, h=0, deltaY="0" )
+
+<Foo x="{{ x + 1 }}" />
+foo(x=x + 1)
+
+<Foo x="{{ x + 1 }}" y="{{ y }}" />
+foo(x=x + 1, y=y)
+
+<Foo x="{{ 2 * x + 15 }}" />
+foo(x = 2 * x + 15)
+
+<Foo x="{{ 2 * x + 15 }}" y="{{ y + 4 }}" />
+foo(x = 2 * x + 15, y = 4)
+
+<Foo x="{{ math.cos(x) + 1 }}" />
+foo(x=math.cos(x) + 1)
+
+<Foo angle="30" />
+foo(angle=30)
+
+<Foo angle="0" />
+<Foo angle="90" />
+<Foo angle="180" />
+<Foo angle="270" />
+foo(angle=0)
+foo(angle=90)
+foo(angle=180)
+foo(angle=270)
+
+<Foo angle="{{ angleExpressionsShouldNotChange }}" />
+foo(angle=angleExpressionsShouldNotChange)

@@ -72,5 +72,8 @@
     "npm-run-all": "^4.1.5",
     "sinon": "^19.0.2",
     "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "mathjs": "^14.3.0"
   }
 }
