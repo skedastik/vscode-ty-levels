@@ -90,8 +90,43 @@ const transformReplacer = (transformExpr: string, match: string, t1: string, alt
     return expr.replace(SYMBOL_REGEX, (match: string, symbolNumber: string) => symbolsToFuncs[`${SYMBOL_PREFIX}${symbolNumber}`]);
 };
 
+const countChar = (str: string, char: string) => {
+    let count = 0;
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] === char) {
+            count++;
+        }
+    }
+    return count;
+};
+
 export const translateX = (text: string, transformExpr: string) => text
     // normal XML attributes (i.e. `x="25"`)
     .replace(/([\s"'](cx|x|xx)\s*=\s*["']\s*)([^"'\{\}]+?)(\s*["'])/g, transformReplacer.bind(null, transformExpr))
     // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
-    .replace(/([\s"'](cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, transformReplacer.bind(null, transformExpr));
+    .replace(/([\s"'](cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, transformReplacer.bind(null, transformExpr))
+    // Jinja macro parameters (i.e. x=foo+25)
+    .replace(/([\s"',\(](cx|x|xx)\s*=\s*)([^"',\}]+)/g, (match: string, t1: string, alt: string, expr: string) => {
+        // In the case where the expression is last in an argument list, the
+        // above regex unavoidably includes an extraneous closing parenthesis
+        // (and additional characters) at the end of the expression string, so
+        // shift them into the final token.
+        let t2 = '';
+        console.log('===========');
+        console.log('match     >'+match);
+        console.log('expr_orig >'+expr);
+        if (countChar(expr, ')') - countChar(expr, '(') === 1) {
+            console.log('PARENS?   >MISMATCHED!');
+            const tokenStart = expr.lastIndexOf(')');
+            t2 = expr.substring(tokenStart, expr.length);
+            expr = expr.substring(0, tokenStart);
+        }
+        console.log('t1        >'+t1);
+        console.log('expr_updt >'+expr);
+        console.log('t2        >'+t2);
+        console.log('===========');
+
+        // TODO: replace funcs with symbols as in transformReplacer
+
+        return transformReplacer(transformExpr, match, t1, alt, expr, t2);
+    });
