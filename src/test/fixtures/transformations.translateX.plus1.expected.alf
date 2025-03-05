@@ -19,7 +19,7 @@
 <Foo x="2 * x + 1" />
 <Foo x="x + sin(x) + 1" />
 <Foo x="2 * sin(x) + 1" />
-<Foo x="2 * function() + 4 + math.cos(x) + this(6) + 0.5 * has(y) + lots(and(lots((of+1)))) + tokens()" />
+<Foo x="2 * function() + 4 + math.cos(x) + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + tokens()" />
 {{ foo(x=x + 1) }}
 
 <Foo x="{{ x + 1 }}" y="{{ y }}" />
@@ -33,7 +33,7 @@
 
 <Foo x="{{ math.cos(x) + 1 }}" />
 <Foo x="{{ 1 }}" />
-<Foo x="{{ 2 * function() + 4 + math.cos(x) + this(6) + 0.5 * has(y) + lots(and(lots((of+1)))) + tokens() }}" />
+<Foo x="{{ 2 * function() + 4 + math.cos(x) + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + tokens() }}" />
 {{ foo(x=math.cos(x) + 1) }}
 {{ foo(x=math.cos(x) + 1, a=0) }}
 {{ foo(x=abs(fn(math.cos(x))) + 1, a=0) }}

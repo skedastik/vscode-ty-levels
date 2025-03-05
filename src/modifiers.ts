@@ -1,5 +1,6 @@
 const math = require('mathjs');
 const crypto = require('crypto');
+import rules from './simplify-rules';
 
 const ETAG_LENGTH = 7;
 
@@ -110,13 +111,12 @@ class ExpressionEncoder {
 }
 
 const transformReplacer = (encoder: ExpressionEncoder, transformExpr: string, match: string, t1: string, alt: string, expr: string, t2: string) => {
-    
     let encodedExpr = encoder.encode(expr);
 
     // Simplify the expression.
     const simplifiedExpr = [
         t1,
-        math.simplify(`(${encodedExpr} + ${transformExpr})`, {}, { exactFractions: false }).toString(),
+        math.simplify(`(${encodedExpr} + ${transformExpr})`, rules, {}, { exactFractions: false }).toString(),
         t2
     ].join('');
 
