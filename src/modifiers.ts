@@ -48,11 +48,11 @@ export const addEtags = (text: string) => text
     .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/g, addEtagsReplacerJinja);
 
 export const removeEtags = (text: string) => text
-    .replace(/((\()\s*?etag\s*?=\s*?["'].*?["']\s*?,?\s*|,\s*?etag\s*?=\s*?["'][^{}]*?["'])/g, '$2')
+    .replace(/((\()\s*etag\s*=\s*["'].*?["']\s*,?\s*|,\s*etag\s*=\s*["'][^{}]*?["'])/g, '$2')
     .replace(/(\s)etag\s*=["'][^{}]*?["'] ?/sg, '$1');
 
 const regenerateEtagsReplacer = (match: string, g1: string, g2: string) => [g1, generateEtag(), g2].join('');
 
-export const regenerateEtags = (text: string) => text.replace(/([\s\()]etag\s*?=\s*?["'])[^{}]*?(["'])/g, regenerateEtagsReplacer);
+export const regenerateEtags = (text: string) => text.replace(/([\s\()]etag\s*=\s*["'])[^{}]*?(["'])/g, regenerateEtagsReplacer);
 
 export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text) ? text.substring(text.indexOf('\n') + 1, text.length) : [AUTOTAG_COMMENT, text].join('\n');
