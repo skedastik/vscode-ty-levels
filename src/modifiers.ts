@@ -65,18 +65,19 @@ export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
 type symbolsToFuncArray = { [key: string]: string };
 class EncodedExpression {
     encodedExpr: string;
-    funcCount: number;
     symbolsToFuncs: symbolsToFuncArray;
+
+    static funcId: number;
 
     static FUNC_REGEX = new RegExp('[^\\s]+\\([^\\(\\)]*\\)+', 'g');
     static SYMBOL_PREFIX = '__s_y_m__';
     static SYMBOL_REGEX = new RegExp(`${EncodedExpression.SYMBOL_PREFIX}([0-9]+)`, 'g');
 
     constructor(expr: string) {
-        this.funcCount = 0;
+        EncodedExpression.funcId = 0;
         this.symbolsToFuncs = {};
         this.encodedExpr = expr.replace(EncodedExpression.FUNC_REGEX, (func: string) => {
-            const symbolName: string = `${EncodedExpression.SYMBOL_PREFIX}${this.funcCount++}`;
+            const symbolName: string = `${EncodedExpression.SYMBOL_PREFIX}${EncodedExpression.funcId++}`;
             this.symbolsToFuncs[symbolName] = func;
             return symbolName;
         });
@@ -90,7 +91,15 @@ class EncodedExpression {
         // Restore function tokens in passed expression.
         return expr.replace(
             EncodedExpression.SYMBOL_REGEX,
-            (match: string, symbolNumber: string) => this.symbolsToFuncs[`${EncodedExpression.SYMBOL_PREFIX}${symbolNumber}`]
+            (match: string, symbolNumber: string) => {
+                const symbol = `${EncodedExpression.SYMBOL_PREFIX}${symbolNumber}`;
+                const func = this.symbolsToFuncs[symbol];
+                if (func === undefined) {
+                    // symbol was encoded by a different EncodedExpression, so leave it as is
+                    return symbol;
+                }
+                return func;
+            }
         );
     }
 }
@@ -123,22 +132,26 @@ const countChar = (str: string, char: string) => {
     return count;
 };
 
-export const translateX = (transformExpr: string, text: string) => text
-    // normal XML attributes (i.e. `x="25"`)
-    .replace(/([\s"'](cx|x|xx)\s*=\s*["']\s*)([^"'\{\}]+?)(\s*["'])/g, transformReplacer.bind(null, transformExpr))
-    // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
-    .replace(/([\s"'](cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, transformReplacer.bind(null, transformExpr))
-    // Jinja macro parameters (i.e. x=foo+25)
-    .replace(/([\s"',\(](cx|x|xx)\s*=\s*)([^"',\}]+)/g, (match: string, t1: string, alt: string, expr: string) => {
-        // In the case where the expression is last in an argument list, the
-        // above regex unavoidably includes an extraneous closing parenthesis
-        // (and additional characters) at the end of the expression string, so
-        // shift them into the final token.
-        let t2 = '';
-        if (countChar(expr, ')') - countChar(expr, '(') === 1) {
-            const tokenStart = expr.lastIndexOf(')');
-            t2 = expr.substring(tokenStart, expr.length);
-            expr = expr.substring(0, tokenStart);
-        }
-        return transformReplacer(transformExpr, match, t1, alt, expr, t2);
-    });
+export const translateX = (transformExpr: string, text: string) => {
+    const encodedTransformExpr = new EncodedExpression(transformExpr);
+    const transformedText = text
+        // normal XML attributes (i.e. `x="25"`)
+        .replace(/([\s"'](cx|x|xx)\s*=\s*["']\s*)([^"'\{\}]+?)(\s*["'])/g, transformReplacer.bind(null, encodedTransformExpr.get()))
+        // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
+        .replace(/([\s"'](cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, transformReplacer.bind(null, encodedTransformExpr.get()))
+        // Jinja macro parameters (i.e. x=foo+25)
+        .replace(/([\s"',\(](cx|x|xx)\s*=\s*)([^"',\}]+)/g, (match: string, t1: string, alt: string, expr: string) => {
+            // In the case where the expression is last in an argument list, the
+            // above regex unavoidably includes an extraneous closing parenthesis
+            // (and additional characters) at the end of the expression string, so
+            // shift them into the final token.
+            let t2 = '';
+            if (countChar(expr, ')') - countChar(expr, '(') === 1) {
+                const tokenStart = expr.lastIndexOf(')');
+                t2 = expr.substring(tokenStart, expr.length);
+                expr = expr.substring(0, tokenStart);
+            }
+            return transformReplacer(encodedTransformExpr.get(), match, t1, alt, expr, t2);
+        });
+    return encodedTransformExpr.decode(transformedText);
+};
