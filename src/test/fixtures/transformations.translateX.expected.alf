@@ -1,44 +1,60 @@
 <Foo />
-foo()
+{{ foo() }}
 
 <Foo irrelevant="" />
-foo(irrelevant='')
+{{ foo(irrelevant='') }}
 
 <Foo x="" />
-foo(x='')
+{{ foo(x='') }}
+{{ foo(x='0') }}
 
 <Foo fakex="0" />
-foo(fakex=0)
+{{ foo(fakex=0) }}
 
 <Foo cx="1" cz="0" x="1" y="0" z="0" xx="1" yy="0" zz="0" w="0" d="0" h="0" deltaY="0" />
-foo(cx=1, cz=0, x=1, y=0, z=0, xx=1, yy=0, zz=0, w=0, d=0, h=0, deltaY="0" )
+{{ foo(cx=1, cz=0, x=1, y=0, z=0, xx=1, yy=0, zz=0, w=0, d=0, h=0, deltaY=0) }}
 
 <Foo x="{{ x + 1 }}" />
-foo(x=x + 1)
+{{ foo(x=x + 1) }}
 
 <Foo x="{{ x + 1 }}" y="{{ y }}" />
-foo(x=x + 1, y=y)
+{{ foo(x=x + 1, y=y) }}
 
 <Foo x="{{ 2 * x + 15 }}" />
-foo(x = 2 * x + 15)
+{{ foo(x = 2 * x + 15) }}
 
 <Foo x="{{ 2 * x + 15 }}" y="{{ y + 4 }}" />
-foo(x = 2 * x + 15, y = 4)
+{{ foo(x = 2 * x + 15, y = 4) }}
 
 <Foo x="{{ math.cos(x) + 1 }}" />
-foo(x=math.cos(x) + 1)
+<Foo x="{{ math.cos(x) + 4 + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + function() + tokens() }}" />
+{{ foo(x=math.cos(x) + 1) }}
+{{ foo(x=math.cos(x) + 1, a=0) }}
+{{ foo(x=abs(fn(math.cos(x))) + 1, a=0) }}
+{{ foo(x=abs(fn(math.cos(x))) + 3, a=0) }}
+{{ foo(x=math.cos(x) + 1,a='0') }}
+{{ foo(b='0',x=math.cos(x) + 1) }}
 
 <Foo angle="30" />
-foo(angle=30)
+{{ foo(angle=30) }}
 
 <Foo angle="0" />
 <Foo angle="90" />
 <Foo angle="180" />
 <Foo angle="270" />
-foo(angle=0)
-foo(angle=90)
-foo(angle=180)
-foo(angle=270)
+{{ foo(angle=0) }}
+{{ foo(angle=90) }}
+{{ foo(angle=180) }}
+{{ foo(angle=270) }}
 
 <Foo angle="{{ angleExpressionsShouldNotChange }}" />
-foo(angle=angleExpressionsShouldNotChange)
+{{ foo(angle=angleExpressionsShouldNotChange) }}
+
+{{ foo( x=1) }}
+{{ foo(x=1 ) }}
+{{ foo( x=1 ) }}
+{{ foo(cx=1,a=0) }}
+{{ foo(a=0,cx=1) }}
+{{ foo(a=0,cx=1,b=0) }}
+{{ foo(cx=1,xx=1) }}
+{{ foo(cx=1,xx=1,x=1) }}
