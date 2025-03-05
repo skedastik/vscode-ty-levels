@@ -44,6 +44,8 @@
 
 <Wall />
 
+<Wall fakeetag="fakeExistingTag" />
+
 {{ wall() }}
 {{ ramp() }}
 

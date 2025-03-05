@@ -44,6 +44,8 @@
 
 <Wall etag='0000000' />
 
+<Wall fakeetag="fakeExistingTag" />
+
 {{ wall() }}
 {{ ramp() }}
 

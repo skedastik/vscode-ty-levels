@@ -44,6 +44,8 @@
 
 <Wall etag='existingTagInSingleQuotes' />
 
+<Wall fakeetag="fakeExistingTag" etag="0000000" />
+
 {{ wall(etag='0000000') }}
 {{ ramp(etag='0000000') }}
 
