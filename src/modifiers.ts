@@ -81,7 +81,7 @@ class ExpressionEncoder {
     // this by passing custom rules to math.simplify, but it's *very*
     // nontrivial.
     encode(expr: string) {
-        const encodedExpr = expr.replace(ExpressionEncoder.FUNC_REGEX, (func: string) => {
+        return expr.replace(ExpressionEncoder.FUNC_REGEX, (func: string) => {
             // Use a hash so that identical strings map to the same symbol. This
             // is not perfect since different string representations could be
             // algebraically equivalent, but it should cover most use cases.
@@ -90,12 +90,11 @@ class ExpressionEncoder {
             this.symbolsToFuncs[symbolName] = func;
             return symbolName;
         });
-        return encodedExpr;
     }
     
     // Restore function tokens in passed expression.
     decode(expr: string) {
-        const decodedExpr = expr.replace(
+        return expr.replace(
             ExpressionEncoder.SYMBOL_REGEX,
             (match: string, id: string) => {
                 const symbol = `${ExpressionEncoder.SYMBOL_PREFIX}${id}`;
@@ -106,7 +105,6 @@ class ExpressionEncoder {
                 return func;
             }
         );
-        return decodedExpr;
     }
 }
 
