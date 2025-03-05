@@ -91,4 +91,7 @@ const transformReplacer = (transformExpr: string, match: string, t1: string, alt
 };
 
 export const translateX = (text: string, transformExpr: string) => text
+    // normal XML attributes (i.e. `x="25"`)
+    .replace(/((cx|x|xx)\s*=\s*["']\s*)([^"'\{\}]+?)(\s*["'])/g, transformReplacer.bind(null, transformExpr))
+    // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
     .replace(/((cx|x|xx)\s*=\s*["']\{\{\s*)([^"'\{\}]+?)(\s*\}\}["'])/g, transformReplacer.bind(null, transformExpr));

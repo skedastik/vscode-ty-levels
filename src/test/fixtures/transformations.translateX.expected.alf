@@ -1,6 +1,9 @@
 <Foo />
 foo()
 
+<Foo irrelevant="" />
+foo(irrelevant='')
+
 <Foo x="" />
 foo(x='')
 
