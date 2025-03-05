@@ -124,6 +124,17 @@ export function activate(context: vscode.ExtensionContext) {
             editBuilder.replace(range, text);
         });
     }));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => {
+        const expr = await vscode.window.showInputBox({
+            prompt: 'Enter translation expression (e.g. "-2" or "myVar" or "2 * math.cos(foo).")',
+            placeHolder: '0'
+        });
+        if (expr === undefined) {
+            return;
+        }
+        modifySelection(mod.translateX.bind(null, expr));
+    }));
 }
 
 export function deactivate() {}

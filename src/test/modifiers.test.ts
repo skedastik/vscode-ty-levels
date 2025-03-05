@@ -62,9 +62,6 @@ suite('Modifiers Test Suite', () => {
     test('translateX', () => {
         const input = fs.readFileSync('src/test/fixtures/transformations.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/transformations.translateX.expected.alf', 'utf-8');
-        console.log('=====');
-        console.log(mod.translateX(input, '1'));
-        console.log('=====');
-        assert.strictEqual(mod.translateX(input, '1'), expected);
+        assert.strictEqual(mod.translateX('1', input), expected);
     });
 });

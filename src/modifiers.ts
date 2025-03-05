@@ -123,7 +123,7 @@ const countChar = (str: string, char: string) => {
     return count;
 };
 
-export const translateX = (text: string, transformExpr: string) => text
+export const translateX = (transformExpr: string, text: string) => text
     // normal XML attributes (i.e. `x="25"`)
     .replace(/([\s"'](cx|x|xx)\s*=\s*["']\s*)([^"'\{\}]+?)(\s*["'])/g, transformReplacer.bind(null, transformExpr))
     // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)

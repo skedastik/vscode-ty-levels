@@ -41,6 +41,10 @@
       {
         "command": "extension.findEtag",
         "title": "Find Etag"
+      },
+      {
+        "command": "extension.translateX",
+        "title": "Translate Elements Along X Axis"
       }
     ]
   },
