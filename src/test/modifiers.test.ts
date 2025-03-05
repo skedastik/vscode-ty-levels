@@ -65,6 +65,6 @@ suite('Modifiers Test Suite', () => {
         console.log('=====');
         console.log(mod.translateX(input, '1'));
         console.log('=====');
-        // assert.strictEqual(mod.translateX(input, '1'), expected);
+        assert.strictEqual(mod.translateX(input, '1'), expected);
     });
 });

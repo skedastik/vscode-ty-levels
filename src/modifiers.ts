@@ -63,7 +63,6 @@ export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
     : [AUTOTAG_COMMENT, text].join('\n');
 
 type symbolsToFuncArray = { [key: string]: string };
-
 class EncodedExpression {
     encodedExpr: string;
     funcCount: number;
@@ -76,12 +75,8 @@ class EncodedExpression {
     constructor(expr: string) {
         this.funcCount = 0;
         this.symbolsToFuncs = {};
-
-        // This is to facilitate temporarily replacing all function tokens in
-        // a given expression before passing to mathjs's simplify function, as
-        // mathjs will munge function names.
         this.encodedExpr = expr.replace(EncodedExpression.FUNC_REGEX, (func: string) => {
-            const symbolName: string = `${EncodedExpression.SYMBOL_PREFIX}${this.funcCount}`;
+            const symbolName: string = `${EncodedExpression.SYMBOL_PREFIX}${this.funcCount++}`;
             this.symbolsToFuncs[symbolName] = func;
             return symbolName;
         });
@@ -101,16 +96,20 @@ class EncodedExpression {
 }
 
 const transformReplacer = (transformExpr: string, match: string, t1: string, alt: string, expr: string, t2: string) => {
+    // Temporarily replace all function tokens in expression before passing to
+    // math.simplify, as mathjs will munge function names (by design). There is
+    // a "clean" way of doing this by passing custom rules to math.simplify, but
+    // it's *very* nontrivial.
     let encodedExpr = new EncodedExpression(expr);
 
     // Simplify the expression.
     const simplifiedExpr = [
         t1,
-        math.simplify(`(${encodedExpr} + ${transformExpr})`, {}, { exactFractions: false }).toString(),
+        math.simplify(`(${encodedExpr.get()} + ${transformExpr})`, {}, { exactFractions: false }).toString(),
         t2
     ].join('');
 
-    // Restore function tokens in expression.
+    // Restore function tokens in simplified expression.
     return encodedExpr.decode(simplifiedExpr);
 };
 
@@ -136,21 +135,10 @@ export const translateX = (text: string, transformExpr: string) => text
         // (and additional characters) at the end of the expression string, so
         // shift them into the final token.
         let t2 = '';
-        console.log('===========');
-        console.log('match     >'+match);
-        console.log('expr_orig >'+expr);
         if (countChar(expr, ')') - countChar(expr, '(') === 1) {
-            console.log('PARENS?   >MISMATCHED!');
             const tokenStart = expr.lastIndexOf(')');
             t2 = expr.substring(tokenStart, expr.length);
             expr = expr.substring(0, tokenStart);
         }
-        console.log('t1        >'+t1);
-        console.log('expr_updt >'+expr);
-        console.log('t2        >'+t2);
-        console.log('===========');
-
-        // TODO: replace funcs with symbols as in transformReplacer
-
         return transformReplacer(transformExpr, match, t1, alt, expr, t2);
     });

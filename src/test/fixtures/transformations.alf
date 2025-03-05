@@ -27,11 +27,11 @@
 {{ foo(x = 2 * x + 14, y = 4) }}
 
 <Foo x="{{ math.cos(x) }}" />
-<Foo x="{{ math.cos(x) + 3 + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + function() + tokens() }}" />
+<Foo x="{{ math.cos(x) + 3 + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + function() + function() + tokens() }}" />
 {{ foo(x=math.cos(x)) }}
 {{ foo(x=math.cos(x), a=0) }}
 {{ foo(x=abs(fn(math.cos(x))), a=0) }}
-{{ foo(x=abs(fm(math.cos(x))) + 2, a=0) }}
+{{ foo(x=abs(fn(math.cos(x))) + 2 + foo(bar) + foo(bar), a=0) }}
 {{ foo(x=math.cos(x),a='0') }}
 {{ foo(b='0',x=math.cos(x)) }}
 
