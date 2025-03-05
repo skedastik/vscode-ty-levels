@@ -40,9 +40,12 @@ const addEtagsReplacer = (
     return match;
 };
 
+const addEtagsReplacerXML = addEtagsReplacer.bind(null, '"', ' ');
+const addEtagsReplacerJinja = addEtagsReplacer.bind(null, "'", ', ');
+
 export const addEtags = (text: string) => text
-    .replace(/<(Wall[^DS]|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, addEtagsReplacer.bind(null, '"', ' '))
-    .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/g, addEtagsReplacer.bind(null, "'", ', '));
+    .replace(/<(Wall[^DS]|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg, addEtagsReplacerXML)
+    .replace(/\{\{\s*(wall|ramp)\(\s*(.*?)(\s*\)\s*\}\})/g, addEtagsReplacerJinja);
 
 export const removeEtags = (text: string) => text
     .replace(/((\()\s*?etag\s*?=\s*?["'].*?["']\s*?,?\s*|,\s*?etag\s*?=\s*?["'][^{}]*?["'])/g, '$2')
