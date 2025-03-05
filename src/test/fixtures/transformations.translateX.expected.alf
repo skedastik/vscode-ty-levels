@@ -7,6 +7,9 @@ foo(irrelevant='')
 <Foo x="" />
 foo(x='')
 
+<Foo fakex="0" />
+foo(fakex=0)
+
 <Foo cx="1" cz="0" x="1" y="0" z="0" xx="1" yy="0" zz="0" w="0" d="0" h="0" deltaY="0" />
 foo(cx=1, cz=0, x=1, y=0, z=0, xx=1, yy=0, zz=0, w=0, d=0, h=0, deltaY="0" )
 
