@@ -133,7 +133,12 @@ export function activate(context: vscode.ExtensionContext) {
         if (expr === undefined) {
             return;
         }
-        modifySelection(mod.translateX.bind(null, expr));
+        try {
+            modifySelection(mod.translateX.bind(null, expr));
+        }
+        catch {
+            vscode.window.showInformationMessage('Invalid expression.');
+        }
     }));
 }
 
