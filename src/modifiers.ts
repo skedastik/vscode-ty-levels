@@ -64,30 +64,54 @@ export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
 
 type symbolsToFuncArray = { [key: string]: string };
 
-const FUNC_REGEX = new RegExp('[^\\s]+\\([^\\(\\)]*\\)+', 'g');
-const SYMBOL_PREFIX = '__s_y_m__';
-const SYMBOL_REGEX = new RegExp(`${SYMBOL_PREFIX}([0-9]+)`, 'g');
+class EncodedExpression {
+    encodedExpr: string;
+    funcCount: number;
+    symbolsToFuncs: symbolsToFuncArray;
+
+    static FUNC_REGEX = new RegExp('[^\\s]+\\([^\\(\\)]*\\)+', 'g');
+    static SYMBOL_PREFIX = '__s_y_m__';
+    static SYMBOL_REGEX = new RegExp(`${EncodedExpression.SYMBOL_PREFIX}([0-9]+)`, 'g');
+
+    constructor(expr: string) {
+        this.funcCount = 0;
+        this.symbolsToFuncs = {};
+
+        // This is to facilitate temporarily replacing all function tokens in
+        // a given expression before passing to mathjs's simplify function, as
+        // mathjs will munge function names.
+        this.encodedExpr = expr.replace(EncodedExpression.FUNC_REGEX, (func: string) => {
+            const symbolName: string = `${EncodedExpression.SYMBOL_PREFIX}${this.funcCount}`;
+            this.symbolsToFuncs[symbolName] = func;
+            return symbolName;
+        });
+    }
+
+    get() {
+        return this.encodedExpr;
+    }
+    
+    decode(expr: string) {
+        // Restore function tokens in passed expression.
+        return expr.replace(
+            EncodedExpression.SYMBOL_REGEX,
+            (match: string, symbolNumber: string) => this.symbolsToFuncs[`${EncodedExpression.SYMBOL_PREFIX}${symbolNumber}`]
+        );
+    }
+}
 
 const transformReplacer = (transformExpr: string, match: string, t1: string, alt: string, expr: string, t2: string) => {
-    // Temporarily replace all function tokens in expression before passing
-    // to math.simplify, as mathjs will munge function names.
-    let funcCount = 0;
-    const symbolsToFuncs: symbolsToFuncArray = {};
-    expr = expr.replace(FUNC_REGEX, (func: string) => {
-        const symbolName: string = `${SYMBOL_PREFIX}${funcCount}`;
-        symbolsToFuncs[symbolName] = func;
-        return symbolName;
-    });
+    let encodedExpr = new EncodedExpression(expr);
 
     // Simplify the expression.
-    expr = [
+    const simplifiedExpr = [
         t1,
-        math.simplify(`(${expr} + ${transformExpr})`, {}, { exactFractions: false }).toString(),
+        math.simplify(`(${encodedExpr} + ${transformExpr})`, {}, { exactFractions: false }).toString(),
         t2
     ].join('');
 
     // Restore function tokens in expression.
-    return expr.replace(SYMBOL_REGEX, (match: string, symbolNumber: string) => symbolsToFuncs[`${SYMBOL_PREFIX}${symbolNumber}`]);
+    return encodedExpr.decode(simplifiedExpr);
 };
 
 const countChar = (str: string, char: string) => {
