@@ -64,7 +64,7 @@ export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
 
 type symbolsToFuncArray = { [key: string]: string };
 
-const FUNC_REGEX = new RegExp('[^\\s]+\\([^\\(\\)]*\\)', 'g');
+const FUNC_REGEX = new RegExp('[^\\s]+\\([^\\(\\)]*\\)+', 'g');
 const SYMBOL_PREFIX = '__s_y_m__';
 const SYMBOL_REGEX = new RegExp(`${SYMBOL_PREFIX}([0-9]+)`, 'g');
 
