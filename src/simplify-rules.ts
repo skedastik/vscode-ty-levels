@@ -1,3 +1,13 @@
+/*
+ * These rules are a modified version of mathjs's default rules. Exponentiation
+ * has been removed since it produces operators that are meaningless to Jinja
+ * and Avara.
+ * 
+ * The original rules are from:
+ * 
+ *     https://github.com/josdejong/mathjs/blob/develop/src/function/algebra/simplify.js#L220
+ */
+
 const math = require('mathjs');
 
 const rules = [
