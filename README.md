@@ -34,15 +34,15 @@ Enable or disable automatic etag creation on save. This adds an "autotag" commen
 
 #### `Add Etags`
 
-Add etags to untagged solids (Walls, Ramps, WallDoors etc.).
+Add etags to selected solids (Walls, Ramps, WallDoors etc.). Existing etags are unchanged. The entire document is affected if nothing is selected.
 
 #### `Remove Etags`
 
-Remove etags.
+Remove etags from selection or entire document.
 
 #### `Regenerate Etags`
 
-Regenerate existing etags.
+Regenerate existing etags across selection or entire document.
 
 #### `Paste with New Etags`
 
