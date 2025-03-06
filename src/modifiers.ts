@@ -108,13 +108,18 @@ class ExpressionEncoder {
     }
 }
 
-const transformReplacer = (encoder: ExpressionEncoder, transformExpr: string, match: string, t1: string, alt: string, expr: string, t2: string) => {
+const transformReplacer = (
+    operator: string,
+    encoder: ExpressionEncoder,
+    transformExpr: string,
+    match: string, t1: string, alt: string, expr: string, t2: string) =>
+{
     let encodedExpr = encoder.encode(expr);
 
     // Simplify the expression.
     const simplifiedExpr = [
         t1,
-        math.simplify(`(${encodedExpr} + ${transformExpr})`, rules, {}, { exactFractions: false }).toString(),
+        math.simplify(`(${encodedExpr}${operator}${transformExpr})`, rules, {}, { exactFractions: false }).toString(),
         t2
     ].join('');
 
@@ -141,12 +146,12 @@ const getXmlAttrJinja = (attrs: attrArray) => new RegExp(`([\\s"\'](${attrs.join
 // Jinja macro parameters (i.e. x=foo+25)
 const getParamJinjaMacro = (attrs: attrArray) => new RegExp(`([\\s"\',\\(](${attrs.join('|')})\\s*=\\s*)([^"\',\\}]+)`, 'g');
 
-const translate = (rawRgx: RegExp, jinjaRgx: RegExp, macroRgx: RegExp, transformExpr: string, text: string) => {
+const transform = (operator: string, rawRgx: RegExp, jinjaRgx: RegExp, macroRgx: RegExp, transformExpr: string, text: string) => {
     const encoder = new ExpressionEncoder();
     const encodedTransformExpr = encoder.encode(transformExpr);
     const transformedText = text
-        .replace(rawRgx, transformReplacer.bind(null, encoder, encodedTransformExpr))
-        .replace(jinjaRgx, transformReplacer.bind(null, encoder, encodedTransformExpr))
+        .replace(rawRgx, transformReplacer.bind(null, operator, encoder, encodedTransformExpr))
+        .replace(jinjaRgx, transformReplacer.bind(null, operator, encoder, encodedTransformExpr))
         .replace(macroRgx, (match: string, t1: string, alt: string, expr: string) => {
             // In the case where the expression is last in an argument list, the
             // above regex unavoidably includes an extraneous closing parenthesis
@@ -158,13 +163,28 @@ const translate = (rawRgx: RegExp, jinjaRgx: RegExp, macroRgx: RegExp, transform
                 t2 = expr.substring(tokenStart, expr.length);
                 expr = expr.substring(0, tokenStart);
             }
-            return transformReplacer(encoder, encodedTransformExpr, match, t1, alt, expr, t2);
+            return transformReplacer(operator, encoder, encodedTransformExpr, match, t1, alt, expr, t2);
         });
     return encoder.decode(transformedText);
 };
 
-export const translateX = translate.bind(null,
+export const translateX = transform.bind(null,
+    '+',
     getXmlAttrRaw(['cx', 'x', 'xx']),
     getXmlAttrJinja(['cx', 'x', 'xx']),
     getParamJinjaMacro(['cx', 'x', 'xx'])
+);
+
+export const translateZ = transform.bind(null,
+    '+',
+    getXmlAttrRaw(['cz', 'z', 'zz']),
+    getXmlAttrJinja(['cz', 'z', 'zz']),
+    getParamJinjaMacro(['cz', 'z', 'zz'])
+);
+
+export const translateY = transform.bind(null,
+    '+',
+    getXmlAttrRaw(['y', 'yy']),
+    getXmlAttrJinja(['y', 'yy']),
+    getParamJinjaMacro(['y', 'yy'])
 );
