@@ -48,7 +48,7 @@ Regenerate existing etags across selection or entire document.
 
 ##### `Paste with New Etags`
 
-Paste from clipboard, automatically regenerating existing etags.
+Paste from clipboard, automatically regenerating etags in the pasted clip.
 
 #### External commands
 
