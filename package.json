@@ -4,7 +4,7 @@
   "description": "Avara level editing enhancements for VS Code.",
   "publisher": "skedastik",
   "repository": "https://github.com/skedastik/vscode-ty-levels",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -45,6 +45,14 @@
       {
         "command": "extension.translateX",
         "title": "Translate Elements Along X Axis"
+      },
+      {
+        "command": "extension.translateZ",
+        "title": "Translate Elements Along Z Axis"
+      },
+      {
+        "command": "extension.translateY",
+        "title": "Translate Elements Along Y Axis"
       }
     ]
   },

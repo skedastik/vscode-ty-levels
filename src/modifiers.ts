@@ -168,6 +168,8 @@ const transform = (operator: string, rawRgx: RegExp, jinjaRgx: RegExp, macroRgx:
     return encoder.decode(transformedText);
 };
 
+export type transformModifier = (transformExpr: string, text: string) => string;
+
 export const translateX = transform.bind(null,
     '+',
     getXmlAttrRaw(['cx', 'x', 'xx']),

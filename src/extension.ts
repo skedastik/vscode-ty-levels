@@ -27,6 +27,27 @@ const modifySelection = (modifier: mod.stringModifier) => {
     });
 };
 
+let lastTransformExpr: string = '0';
+const TRANSLATE_PROMPT = 'Enter translation expression (e.g. \'-2\')';
+
+// Transform (translate/mirror etc.) elements
+const transformSelection = async (modifier: mod.transformModifier, prompt: string) => {
+    const expr = await vscode.window.showInputBox({
+        prompt,
+        value: lastTransformExpr
+    });
+    if (expr === undefined || expr === '0' || expr === '') {
+        return;
+    }
+    try {
+        modifySelection(modifier.bind(null, expr));
+        lastTransformExpr = expr;
+    }
+    catch {
+        vscode.window.showInformationMessage('Invalid expression.');
+    }
+};
+
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => modifySelection(mod.addEtags)));
     context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => modifySelection(mod.removeEtags)));
@@ -125,21 +146,18 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => {
-        const expr = await vscode.window.showInputBox({
-            prompt: 'Enter translation expression (e.g. "-2")',
-            placeHolder: '0'
-        });
-        if (expr === undefined) {
-            return;
-        }
-        try {
-            modifySelection(mod.translateX.bind(null, expr));
-        }
-        catch {
-            vscode.window.showInformationMessage('Invalid expression.');
-        }
-    }));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => transformSelection(
+        mod.translateX,
+        TRANSLATE_PROMPT
+    )));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', async () => transformSelection(
+        mod.translateZ,
+        TRANSLATE_PROMPT
+    )));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', async () => transformSelection(
+        mod.translateY,
+        TRANSLATE_PROMPT
+    )));
 }
 
 export function deactivate() {}
