@@ -141,24 +141,13 @@ const getXmlAttrJinja = (attrs: attrArray) => new RegExp(`([\\s"\'](${attrs.join
 // Jinja macro parameters (i.e. x=foo+25)
 const getParamJinjaMacro = (attrs: attrArray) => new RegExp(`([\\s"\',\\(](${attrs.join('|')})\\s*=\\s*)([^"\',\\}]+)`, 'g');
 
-const RGX_ATTR_XML_RAW_TRANSLATE_X = getXmlAttrRaw(['cx', 'x', 'xx']);
-const RGX_ATTR_XML_JINJA_TRANSLATE_X = getXmlAttrJinja(['cx', 'x', 'xx']);
-const RGX_ATTR_JINJA_MACRO_X = getParamJinjaMacro(['cx', 'x', 'xx']);
-
-const translateModifier = (attrRegexAlt: string, transformExpr: string, text: string) => {
-    // TODO
-};
-
-export const translateX = (transformExpr: string, text: string) => {
+const translate = (rawRgx: RegExp, jinjaRgx: RegExp, macroRgx: RegExp, transformExpr: string, text: string) => {
     const encoder = new ExpressionEncoder();
     const encodedTransformExpr = encoder.encode(transformExpr);
     const transformedText = text
-        // normal XML attributes (i.e. `x="25"`)
-        .replace(RGX_ATTR_XML_RAW_TRANSLATE_X, transformReplacer.bind(null, encoder, encodedTransformExpr))
-        // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
-        .replace(RGX_ATTR_XML_JINJA_TRANSLATE_X, transformReplacer.bind(null, encoder, encodedTransformExpr))
-        // Jinja macro parameters (i.e. x=foo+25)
-        .replace(RGX_ATTR_JINJA_MACRO_X, (match: string, t1: string, alt: string, expr: string) => {
+        .replace(rawRgx, transformReplacer.bind(null, encoder, encodedTransformExpr))
+        .replace(jinjaRgx, transformReplacer.bind(null, encoder, encodedTransformExpr))
+        .replace(macroRgx, (match: string, t1: string, alt: string, expr: string) => {
             // In the case where the expression is last in an argument list, the
             // above regex unavoidably includes an extraneous closing parenthesis
             // (and additional characters) at the end of the expression string, so
@@ -173,3 +162,9 @@ export const translateX = (transformExpr: string, text: string) => {
         });
     return encoder.decode(transformedText);
 };
+
+export const translateX = translate.bind(null,
+    getXmlAttrRaw(['cx', 'x', 'xx']),
+    getXmlAttrJinja(['cx', 'x', 'xx']),
+    getParamJinjaMacro(['cx', 'x', 'xx'])
+);
