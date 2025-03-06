@@ -86,4 +86,18 @@ suite('Modifiers Test Suite', () => {
         const expected = '<Foo x="{{ x * x + 1 }}"';
         assert.strictEqual(mod.translateX(expr, input), expected);
     });
+
+    test('translateZ', () => {
+        const expr = '1';
+        const input = '{{ foo(cx=0, x=0, xx=0, cz=0, z=0, zz=0, y=0, yy=0, irrelevant="0" }}';
+        const expected = '{{ foo(cx=0, x=0, xx=0, cz=1, z=1, zz=1, y=0, yy=0, irrelevant="0" }}';
+        assert.strictEqual(mod.translateZ(expr, input), expected);
+    });
+
+    test('translateY', () => {
+        const expr = '1';
+        const input = '{{ foo(cx=0, x=0, xx=0, cz=0, z=0, zz=0, y=0, yy=0, irrelevant="0" }}';
+        const expected = '{{ foo(cx=0, x=0, xx=0, cz=0, z=0, zz=0, y=1, yy=1, irrelevant="0" }}';
+        assert.strictEqual(mod.translateY(expr, input), expected);
+    });
 });
