@@ -32,19 +32,21 @@ Add to y/yy attributes.
 
 Enable or disable automatic etag creation on save. This adds an "autotag" comment to the top of your file when enabled.
 
-#### `Add Etags`
+#### Manual tagging
+
+##### `Add Etags`
 
 Add etags to selected solids (Walls, Ramps, WallDoors etc.). Existing etags are unchanged. The entire document is affected if nothing is selected.
 
-#### `Remove Etags`
+##### `Remove Etags`
 
 Remove etags from selection or entire document.
 
-#### `Regenerate Etags`
+##### `Regenerate Etags`
 
 Regenerate existing etags across selection or entire document.
 
-#### `Paste with New Etags`
+##### `Paste with New Etags`
 
 Paste from clipboard, automatically regenerating existing etags.
 
