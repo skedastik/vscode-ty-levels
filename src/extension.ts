@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
-import * as mod from './modifiers';
+import * as modifyEtag from './modify-etag';
+import * as modifyTransform from './modify-transform';
+
+type stringModifier = (s: string) => string;
 
 // Modify the currently selected text or the entire document if no text is selected.
-const modifySelection = (modifier: mod.stringModifier) => {
+const modifySelection = (modifier: stringModifier) => {
     const editor = vscode.window.activeTextEditor;
 
     if (!editor) {
@@ -30,8 +33,10 @@ const modifySelection = (modifier: mod.stringModifier) => {
 let lastTransformExpr: string = '0';
 const TRANSLATE_PROMPT = 'Enter translation expression (e.g. \'-2\')';
 
+type transformModifier = (transformExpr: string, text: string) => string;
+
 // Transform (translate/mirror etc.) elements
-const transformSelection = async (modifier: mod.transformModifier, prompt: string) => {
+const transformSelection = async (modifier: transformModifier, prompt: string) => {
     const expr = await vscode.window.showInputBox({
         prompt,
         value: lastTransformExpr
@@ -49,9 +54,9 @@ const transformSelection = async (modifier: mod.transformModifier, prompt: strin
 };
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => modifySelection(mod.addEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => modifySelection(mod.removeEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => modifySelection(mod.regenerateEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => modifySelection(modifyEtag.addEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => modifySelection(modifyEtag.removeEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => modifySelection(modifyEtag.regenerateEtags)));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
         const editor = vscode.window.activeTextEditor;
@@ -95,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const clipboardText = await vscode.env.clipboard.readText();
-        const text = mod.regenerateEtags(clipboardText);
+        const text = modifyEtag.regenerateEtags(clipboardText);
 
         editor.edit(editBuilder => {
             editBuilder.replace(editor.selection, text);
@@ -115,9 +120,9 @@ export function activate(context: vscode.ExtensionContext) {
         const document = editor.document;
         const firstLine = document.lineAt(0).text;
 
-        if (mod.AUTOTAG_REGEX.test(firstLine)) {
+        if (modifyEtag.AUTOTAG_REGEX.test(firstLine)) {
             const text = document.getText();
-            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), mod.addEtags(text));
+            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), modifyEtag.addEtags(text));
             event.waitUntil(Promise.resolve([textEdit]));   
         }
     }));
@@ -133,9 +138,9 @@ export function activate(context: vscode.ExtensionContext) {
         const range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
         let text = document.getText();
 
-        text = mod.toggleAutoTagComment(text);
-        if (mod.AUTOTAG_REGEX.test(text)) {
-            text = mod.addEtags(text);
+        text = modifyEtag.toggleAutoTagComment(text);
+        if (modifyEtag.AUTOTAG_REGEX.test(text)) {
+            text = modifyEtag.addEtags(text);
             vscode.window.showInformationMessage('Autotag enabled.');
         } else {
             vscode.window.showInformationMessage('Autotag disabled.');
@@ -147,15 +152,15 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => transformSelection(
-        mod.translateX,
+        modifyTransform.translateX,
         TRANSLATE_PROMPT
     )));
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', async () => transformSelection(
-        mod.translateZ,
+        modifyTransform.translateZ,
         TRANSLATE_PROMPT
     )));
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', async () => transformSelection(
-        mod.translateY,
+        modifyTransform.translateY,
         TRANSLATE_PROMPT
     )));
 }

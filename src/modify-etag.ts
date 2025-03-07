@@ -1,12 +1,8 @@
-import Transform from './Transform';
-
 const ETAG_LENGTH = 7;
 
 const AUTOTAG_STRING = 'autotag';
 const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
 export const AUTOTAG_REGEX = new RegExp(`^\\s*<!--\\s+${AUTOTAG_STRING}\\s+-->`);
-
-export type stringModifier = (s: string) => string;
 
 const generateEtag = () => {
     const chars = [];
@@ -61,36 +57,3 @@ export const regenerateEtags = (text: string) => text
 export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
     ? text.substring(text.indexOf('\n') + 1, text.length)
     : [AUTOTAG_COMMENT, text].join('\n');
-
-export type transformModifier = (transformExpr: string, text: string) => string;
-
-const additionOperation = (transformExpr: string, currentExpr: string) => `(${currentExpr}) + ${transformExpr}`;
-const multiplicationOperation = (transformExpr: string, currentExpr: string) => `(${currentExpr}) * ${transformExpr}`;
-
-const xAttributeNames = ['cx', 'x', 'xx'];
-const zAttributeNames = ['cz', 'z', 'zz'];
-const yAttributeNames = ['y', 'yy'];
-
-const xAdd = new Transform(xAttributeNames, additionOperation, true);
-const zAdd = new Transform(zAttributeNames, additionOperation, true);
-const yAdd = new Transform(yAttributeNames, additionOperation, true);
-
-export const translateX = (transformExpr: string, text: string) => xAdd.apply(transformExpr, text);
-export const translateZ = (transformExpr: string, text: string) => zAdd.apply(transformExpr, text);
-export const translateY = (transformExpr: string, text: string) => yAdd.apply(transformExpr, text);
-
-// const xMultiply = new Transform(['cx', 'x', 'xx'], additionOperation, true);
-
-// export const mirrorX = (text: string) => {
-//     const rgxTranslateXar = Transformer.getRegexForXmlAttributes(['cx', 'x', 'xx']);
-//     const rgxTranslateAxj = Transformer.getRegexForXmlAttributesWithJinjaExpressions(['cx', 'x', 'xx']);
-//     const rgxTranslatePjm = Transformer.getRegexForJinjaMacroParameters(['cx', 'x', 'xx']);
-
-//     text = transform(rgxTranslateXar, rgxTranslateAxj, rgxTranslatePjm, new ExpressionEncoder(), '-1', '*', text);
-    
-//     const rgxMirrorAxr = Transformer.getRegexForXmlAttributes(['angle']);
-//     const rgxMirrorAxj = Transformer.getRegexForXmlAttributesWithJinjaExpressions(['angle']);
-//     const rgxMirrorPjm = Transformer.getRegexForJinjaMacroParameters(['angle']);
-
-//     text = transform(rgxMirrorAxr, rgxMirrorAxj, rgxMirrorPjm, null, '+', '[TODO] angle goes here?', text);
-// };
