@@ -47,7 +47,7 @@ class ExpressionEncoder {
     }
 }
 
-type transformOperation = (currentExpr: string, transformExpr: (string | null)) => string;
+type transformOperation = (currentExpr: string, transformExpr: string) => string;
 
 export default class Transform {
     rgxXar: RegExp;
@@ -83,12 +83,12 @@ export default class Transform {
         this.encoder = null;
     }
 
-    apply(text: string, transformExpr: (string | null) = null) {
+    apply(text: string, transformExpr: string = '') {
         if (this.simplifyExpressions) {
             // ExpressionEncoders should not be reused across different input expressions, so instantiate a new one
             this.encoder = new ExpressionEncoder();
         }
-        const encodedTransformExpr = this.encoder && transformExpr ? this.encoder.encode(transformExpr) : transformExpr;
+        const encodedTransformExpr = this.encoder ? this.encoder.encode(transformExpr) : transformExpr;
         const transformedText = text
             .replace(this.rgxXar, (match: string, t1: string, alt: string, expr: string, t2: string) => {
                 return this.replace(encodedTransformExpr, t1, expr, t2);
@@ -105,7 +105,7 @@ export default class Transform {
         return this.encoder ? this.encoder.decode(transformedText) : transformedText;
     }
 
-    private replace(transformExpr: (string | null), t1: string, expr: string, t2: string) {
+    private replace(transformExpr: string, t1: string, expr: string, t2: string) {
         const encodedExpr = this.encoder ? this.encoder.encode(expr) : expr;
         const appliedExpr = this.operation(encodedExpr, transformExpr);
         const simplifiedExpr = this.simplifyExpressions ? math.simplify(appliedExpr, simplificationRules, {}, { exactFractions: false }).toString() : appliedExpr;
