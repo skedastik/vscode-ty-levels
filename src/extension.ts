@@ -104,6 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
             editBuilder.replace(editor.selection, text);
         });
     }));
+    
     context.subscriptions.push(vscode.commands.registerCommand('editor.action.clipboardPasteAction', () => {
         vscode.commands.executeCommand('extension.pasteWithNewEtags');
     }));
