@@ -1,6 +1,6 @@
 const math = require('mathjs');
 const crypto = require('crypto');
-import rules from './simplify-rules';
+import { rules as simplificationRules } from './simplify-rules';
 
 const ETAG_LENGTH = 7;
 
@@ -108,80 +108,88 @@ class ExpressionEncoder {
     }
 }
 
-const transformReplacer = (
-    operator: string,
-    encoder: (ExpressionEncoder | null),
-    transformExpr: string,
-    t1: string, expr: string, t2: string) =>
-[
-    t1,
-    math.simplify(`(${encoder ? encoder.encode(expr) : null})${operator}${transformExpr}`, rules, {}, { exactFractions: false }).toString(),
-    t2
-].join('');
+type transformOperation = (transformExpr: string, currentExpr: string) => string;
 
-type attrArray = string[];
+class Transformer {
+    rgxXar: RegExp;
+    rgxXaj: RegExp;
+    rgxPjm: RegExp;
+    encoder: (ExpressionEncoder | null);
+    operation: transformOperation;
 
-// normal XML attributes (i.e. `x="25"`)
-const getXmlAttrRaw = (attrs: attrArray) => new RegExp(
-    `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\s*)([^"'\\{\\}]+?)(\\s*["'])`, 'g'
-);
-// XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
-const getXmlAttrJinja = (attrs: attrArray) => new RegExp(
-    `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\{\\{\\s*)([^"'\\{\\}]+?)(\\s*\\}\\}["'])`, 'g'
-);
-// Jinja macro parameters (i.e. x=foo+25)
-const getParamJinjaMacro = (attrs: attrArray) => new RegExp(
-    `(([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+)(\\)\\s*\\})|([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+))`, 'g'
-);
+    // normal XML attributes (i.e. `x="25"`)
+    static getRegexForXmlAttributes = (attrs: string[]) => new RegExp(
+        `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\s*)([^"'\\{\\}]+?)(\\s*["'])`, 'g'
+    );
+    // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
+    static getRegexForXmlAttributesWithJinjaExpressions = (attrs: string[]) => new RegExp(
+        `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\{\\{\\s*)([^"'\\{\\}]+?)(\\s*\\}\\}["'])`, 'g'
+    );
+    // Jinja macro parameters (i.e. x=foo+25)
+    static getRegexForJinjaMacroParameters = (attrs: string[]) => new RegExp(
+        `(([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+)(\\)\\s*\\})|([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+))`, 'g'
+    );
 
-const transform = (
-    operator: string,
-    rgxXar: RegExp,
-    rgxXaj: RegExp,
-    rgxPjm: RegExp,
-    encoder: (ExpressionEncoder | null),
-    transformExpr: string,
-    text: string
-) => {
-    const encodedTransformExpr = encoder ? encoder.encode(transformExpr) : transformExpr;
-    const transformedText = text
-        .replace(rgxXar, (match, t1, alt, expr, t2) => {
-            return transformReplacer(operator, encoder, encodedTransformExpr, t1, expr, t2);
-        })
-        .replace(rgxXaj, (match, t1, alt, expr, t2) => {
-            return transformReplacer(operator, encoder, encodedTransformExpr, t1, expr, t2);
-        })
-        .replace(rgxPjm, (match, g1, g2, g3, g4, g5, g6, g7, g8) => {
-            const t1 = g8 ? g6 : g2;
-            const expr = g8 ? g8 : g4;
-            const t2 = g8 ? '' : g5;
-            return transformReplacer(operator, encoder, encodedTransformExpr, t1, expr, t2);
-        });
-    return encoder ? encoder.decode(transformedText) : transformedText;
-};
+    constructor(
+        targetAttributes: string[],
+        operation: transformOperation,
+        doEncodeExpressions: boolean
+    ) { 
+        this.rgxXar = Transformer.getRegexForXmlAttributes(targetAttributes);
+        this.rgxXaj = Transformer.getRegexForXmlAttributesWithJinjaExpressions(targetAttributes);
+        this.rgxPjm = Transformer.getRegexForJinjaMacroParameters(targetAttributes);
+        this.operation = operation;
+        this.encoder = doEncodeExpressions ? new ExpressionEncoder : null;
+    }
+
+    transform(transformExpr: string, text: string) {
+        const encodedTransformExpr = this.encoder ? this.encoder.encode(transformExpr) : transformExpr;
+        const transformedText = text
+            .replace(this.rgxXar, (match: string, t1: string, alt: string, expr: string, t2: string) => {
+                return this.replace(encodedTransformExpr, t1, expr, t2);
+            })
+            .replace(this.rgxXaj, (match: string, t1: string, alt: string, expr: string, t2: string) => {
+                return this.replace(encodedTransformExpr, t1, expr, t2);
+            })
+            .replace(this.rgxPjm, (match: string, g1: string, g2: string, g3: string, g4: string, g5: string, g6: string, g7: string, g8: string) => {
+                const t1 = g8 ? g6 : g2;
+                const expr = g8 ? g8 : g4;
+                const t2 = g8 ? '' : g5;
+                return this.replace(encodedTransformExpr, t1, expr, t2);
+            });
+        return this.encoder ? this.encoder.decode(transformedText) : transformedText;
+    }
+
+    private replace(transformExpr: string, t1: string, expr: string, t2: string) {
+        const encodedExpr = this.encoder ? this.encoder.encode(expr) : expr;
+        const appliedExpr = this.operation(transformExpr, encodedExpr);
+        const simplifiedExpr = math.simplify(appliedExpr, simplificationRules, {}, { exactFractions: false }).toString();
+        return [t1, simplifiedExpr, t2].join('');
+    }
+}
 
 export type transformModifier = (transformExpr: string, text: string) => string;
 
-export const translateX = transform.bind(null,
-    '+',
-    getXmlAttrRaw(['cx', 'x', 'xx']),
-    getXmlAttrJinja(['cx', 'x', 'xx']),
-    getParamJinjaMacro(['cx', 'x', 'xx']),
-    new ExpressionEncoder()
-);
+const additionOperation = (transformExpr: string, currentExpr: string) => `(${currentExpr}) + ${transformExpr}`;
 
-export const translateZ = transform.bind(null,
-    '+',
-    getXmlAttrRaw(['cz', 'z', 'zz']),
-    getXmlAttrJinja(['cz', 'z', 'zz']),
-    getParamJinjaMacro(['cz', 'z', 'zz']),
-    new ExpressionEncoder()
-);
+const translateXTransformer = new Transformer(['cx', 'x', 'xx'], additionOperation, true);
+const translateZTransformer = new Transformer(['cz', 'z', 'zz'], additionOperation, true);
+const translateYTransformer = new Transformer(['y', 'yy'], additionOperation, true);
 
-export const translateY = transform.bind(null,
-    '+',
-    getXmlAttrRaw(['y', 'yy']),
-    getXmlAttrJinja(['y', 'yy']),
-    getParamJinjaMacro(['y', 'yy']),
-    new ExpressionEncoder()
-);
+export const translateX = (transformExpr: string, text: string) => translateXTransformer.transform(transformExpr, text);
+export const translateZ = (transformExpr: string, text: string) => translateZTransformer.transform(transformExpr, text);
+export const translateY = (transformExpr: string, text: string) => translateYTransformer.transform(transformExpr, text);
+
+// export const mirrorX = (text: string) => {
+//     const rgxTranslateXar = Transformer.getRegexForXmlAttributes(['cx', 'x', 'xx']);
+//     const rgxTranslateAxj = Transformer.getRegexForXmlAttributesWithJinjaExpressions(['cx', 'x', 'xx']);
+//     const rgxTranslatePjm = Transformer.getRegexForJinjaMacroParameters(['cx', 'x', 'xx']);
+
+//     text = transform(rgxTranslateXar, rgxTranslateAxj, rgxTranslatePjm, new ExpressionEncoder(), '-1', '*', text);
+    
+//     const rgxMirrorAxr = Transformer.getRegexForXmlAttributes(['angle']);
+//     const rgxMirrorAxj = Transformer.getRegexForXmlAttributesWithJinjaExpressions(['angle']);
+//     const rgxMirrorPjm = Transformer.getRegexForJinjaMacroParameters(['angle']);
+
+//     text = transform(rgxMirrorAxr, rgxMirrorAxj, rgxMirrorPjm, null, '+', '[TODO] angle goes here?', text);
+// };
