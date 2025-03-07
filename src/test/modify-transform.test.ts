@@ -5,8 +5,8 @@ import * as mod from '../modify-transform';
 suite('Modifiers Test Suite', () => {
     test('translateX + 1', () => {
         const expr = '1';
-        const input = fs.readFileSync('src/test/fixtures/transformations.alf', 'utf-8');
-        const expected = fs.readFileSync('src/test/fixtures/transformations.translateX.plus1.expected.alf', 'utf-8');
+        const input = fs.readFileSync('src/test/fixtures/transform.translate.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.translate.x.plus1.expected.alf', 'utf-8');
         assert.strictEqual(mod.translateX(input, expr), expected);
     });
 
@@ -43,5 +43,17 @@ suite('Modifiers Test Suite', () => {
         const input = '{{ foo(cx=0, x=0, xx=0, cz=0, z=0, zz=0, y=0, yy=0, irrelevant="0" }}';
         const expected = '{{ foo(cx=0, x=0, xx=0, cz=0, z=0, zz=0, y=1, yy=1, irrelevant="0" }}';
         assert.strictEqual(mod.translateY(input, expr), expected);
+    });
+
+    test('mirrorZ', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.mirror.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.mirror.z.expected.alf', 'utf-8');
+        assert.strictEqual(mod.mirrorZ(input), expected);
+    });
+
+    test('mirrorX', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.mirror.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.mirror.x.expected.alf', 'utf-8');
+        assert.strictEqual(mod.mirrorX(input), expected);
     });
 });
