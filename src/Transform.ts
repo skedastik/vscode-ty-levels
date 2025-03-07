@@ -73,7 +73,7 @@ export default class Transform {
     constructor(
         targetAttributes: string[],
         operation: transformOperation,
-        simplifyExpressions: boolean = false
+        simplifyExpressions: boolean = true
     ) { 
         this.rgxXar = Transform.getRegexForXmlAttributes(targetAttributes);
         this.rgxXaj = Transform.getRegexForXmlAttributesWithJinjaExpressions(targetAttributes);

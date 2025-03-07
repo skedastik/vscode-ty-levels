@@ -24,13 +24,13 @@ const zAttributes = ['cz', 'z', 'zz'];
 const yAttributes = ['y', 'yy'];
 const angleAttributes = ['angle'];
 
-const xAdd = new Transform(xAttributes, additionOperation, true);
-const zAdd = new Transform(zAttributes, additionOperation, true);
-const yAdd = new Transform(yAttributes, additionOperation, true);
-const xMultiply = new Transform(xAttributes, multiplicationOperation, true);
-const zMultiply = new Transform(zAttributes, multiplicationOperation, true);
-const angleMirrorZ = new Transform(angleAttributes, angleMirrorZOperation);
-const angleMirrorX = new Transform(angleAttributes, angleMirrorXOperation);
+const xAdd = new Transform(xAttributes, additionOperation);
+const zAdd = new Transform(zAttributes, additionOperation);
+const yAdd = new Transform(yAttributes, additionOperation);
+const xMultiply = new Transform(xAttributes, multiplicationOperation);
+const zMultiply = new Transform(zAttributes, multiplicationOperation);
+const angleMirrorZ = new Transform(angleAttributes, angleMirrorZOperation, false);
+const angleMirrorX = new Transform(angleAttributes, angleMirrorXOperation, false);
 
 export const translateX = (text: string, transformExpr: string) => xAdd.apply(text, transformExpr);
 export const translateZ = (text: string, transformExpr: string) => zAdd.apply(text, transformExpr);
