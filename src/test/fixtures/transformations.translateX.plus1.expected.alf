@@ -40,6 +40,9 @@
 {{ foo(x=2 * foo(bar) + 3 + abs(fn(math.cos(x))), a=0) }}
 {{ foo(x=math.cos(x) + 1,a='0') }}
 {{ foo(b='0',x=math.cos(x) + 1) }}
+{{foo(xx=31,cx=fn1(fn2()) + 1,x=math.cos(x) + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + 4)}}
+{{foo(x=math.cos(x) + this(6) + has(y) / 2 + lots(and(lots((of+1)))) + 4)}}
+{{foo(xx=31)}}
 
 <Foo angle="30" />
 {{ foo(angle=30) }}

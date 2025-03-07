@@ -110,62 +110,54 @@ class ExpressionEncoder {
 
 const transformReplacer = (
     operator: string,
-    encoder: ExpressionEncoder,
+    encoder: (ExpressionEncoder | null),
     transformExpr: string,
-    match: string, t1: string, alt: string, expr: string, t2: string) =>
-{
-    let encodedExpr = encoder.encode(expr);
-
-    // Simplify the expression.
-    const simplifiedExpr = [
-        t1,
-        math.simplify(`(${encodedExpr}${operator}${transformExpr})`, rules, {}, { exactFractions: false }).toString(),
-        t2
-    ].join('');
-
-    // Restore function tokens in simplified expression.
-    return simplifiedExpr;
-};
-
-const countChar = (str: string, char: string) => {
-    let count = 0;
-    for (let i = 0; i < str.length; i++) {
-        if (str[i] === char) {
-            count++;
-        }
-    }
-    return count;
-};
+    t1: string, expr: string, t2: string) =>
+[
+    t1,
+    math.simplify(`(${encoder ? encoder.encode(expr) : null})${operator}${transformExpr}`, rules, {}, { exactFractions: false }).toString(),
+    t2
+].join('');
 
 type attrArray = string[];
 
 // normal XML attributes (i.e. `x="25"`)
-const getXmlAttrRaw = (attrs: attrArray) => new RegExp(`([\\s"\'](${attrs.join('|')})\\s*=\\s*["\']\\s*)([^"\'\\{\\}]+?)(\\s*["\'])`, 'g');
+const getXmlAttrRaw = (attrs: attrArray) => new RegExp(
+    `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\s*)([^"'\\{\\}]+?)(\\s*["'])`, 'g'
+);
 // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
-const getXmlAttrJinja = (attrs: attrArray) => new RegExp(`([\\s"\'](${attrs.join('|')})\\s*=\\s*["\']\\{\\{\\s*)([^"\'\\{\\}]+?)(\\s*\\}\\}["\'])`, 'g');
+const getXmlAttrJinja = (attrs: attrArray) => new RegExp(
+    `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\{\\{\\s*)([^"'\\{\\}]+?)(\\s*\\}\\}["'])`, 'g'
+);
 // Jinja macro parameters (i.e. x=foo+25)
-const getParamJinjaMacro = (attrs: attrArray) => new RegExp(`([\\s"\',\\(](${attrs.join('|')})\\s*=\\s*)([^"\',\\}]+)`, 'g');
+const getParamJinjaMacro = (attrs: attrArray) => new RegExp(
+    `(([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+)(\\)\\s*\\})|([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+))`, 'g'
+);
 
-const transform = (operator: string, rawRgx: RegExp, jinjaRgx: RegExp, macroRgx: RegExp, transformExpr: string, text: string) => {
-    const encoder = new ExpressionEncoder();
-    const encodedTransformExpr = encoder.encode(transformExpr);
+const transform = (
+    operator: string,
+    rgxXar: RegExp,
+    rgxXaj: RegExp,
+    rgxPjm: RegExp,
+    encoder: (ExpressionEncoder | null),
+    transformExpr: string,
+    text: string
+) => {
+    const encodedTransformExpr = encoder ? encoder.encode(transformExpr) : transformExpr;
     const transformedText = text
-        .replace(rawRgx, transformReplacer.bind(null, operator, encoder, encodedTransformExpr))
-        .replace(jinjaRgx, transformReplacer.bind(null, operator, encoder, encodedTransformExpr))
-        .replace(macroRgx, (match: string, t1: string, alt: string, expr: string) => {
-            // In the case where the expression is last in an argument list, the
-            // above regex unavoidably includes an extraneous closing parenthesis
-            // (and additional characters) at the end of the expression string, so
-            // shift them into the final token.
-            let t2 = '';
-            if (countChar(expr, ')') - countChar(expr, '(') === 1) {
-                const tokenStart = expr.lastIndexOf(')');
-                t2 = expr.substring(tokenStart, expr.length);
-                expr = expr.substring(0, tokenStart);
-            }
-            return transformReplacer(operator, encoder, encodedTransformExpr, match, t1, alt, expr, t2);
+        .replace(rgxXar, (match, t1, alt, expr, t2) => {
+            return transformReplacer(operator, encoder, encodedTransformExpr, t1, expr, t2);
+        })
+        .replace(rgxXaj, (match, t1, alt, expr, t2) => {
+            return transformReplacer(operator, encoder, encodedTransformExpr, t1, expr, t2);
+        })
+        .replace(rgxPjm, (match, g1, g2, g3, g4, g5, g6, g7, g8) => {
+            const t1 = g8 ? g6 : g2;
+            const expr = g8 ? g8 : g4;
+            const t2 = g8 ? '' : g5;
+            return transformReplacer(operator, encoder, encodedTransformExpr, t1, expr, t2);
         });
-    return encoder.decode(transformedText);
+    return encoder ? encoder.decode(transformedText) : transformedText;
 };
 
 export type transformModifier = (transformExpr: string, text: string) => string;
@@ -174,19 +166,22 @@ export const translateX = transform.bind(null,
     '+',
     getXmlAttrRaw(['cx', 'x', 'xx']),
     getXmlAttrJinja(['cx', 'x', 'xx']),
-    getParamJinjaMacro(['cx', 'x', 'xx'])
+    getParamJinjaMacro(['cx', 'x', 'xx']),
+    new ExpressionEncoder()
 );
 
 export const translateZ = transform.bind(null,
     '+',
     getXmlAttrRaw(['cz', 'z', 'zz']),
     getXmlAttrJinja(['cz', 'z', 'zz']),
-    getParamJinjaMacro(['cz', 'z', 'zz'])
+    getParamJinjaMacro(['cz', 'z', 'zz']),
+    new ExpressionEncoder()
 );
 
 export const translateY = transform.bind(null,
     '+',
     getXmlAttrRaw(['y', 'yy']),
     getXmlAttrJinja(['y', 'yy']),
-    getParamJinjaMacro(['y', 'yy'])
+    getParamJinjaMacro(['y', 'yy']),
+    new ExpressionEncoder()
 );
