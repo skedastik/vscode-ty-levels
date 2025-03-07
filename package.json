@@ -6,7 +6,7 @@
   "repository": "https://github.com/skedastik/vscode-ty-levels",
   "version": "0.0.7",
   "engines": {
-    "vscode": "^1.97.0"
+    "vscode": "^1.96.0"
   },
   "categories": [
     "Other"
