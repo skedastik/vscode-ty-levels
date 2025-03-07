@@ -1,6 +1,7 @@
 const math = require('mathjs');
 const crypto = require('crypto');
 import { rules as simplificationRules } from './simplify-rules';
+import * as alf from './alf-regex';
 
 type symbolsToFuncMap = { [key: string]: string };
 
@@ -49,56 +50,33 @@ class ExpressionEncoder {
 
 type transformOperation = (currentExpr: string, transformExpr: string) => string;
 
-type transformFilter = {
-    xmlTag: string,
-    jinjaMacro: string
-};
-
 export default class Transform {
     regexTag: RegExp;
     regexMacro: RegExp;
-    encoder: (ExpressionEncoder | null);
+    encoder?: ExpressionEncoder;
     operation: transformOperation;
     simplifyExpressions: boolean;
-    filter: transformFilter | null;
-
-    // Multiple XML tag attributes (i.e. `x="0"` or `x="{{ myVar + 2 }}"`) for any tag
-    static getRegexForGeneralXmlTagAttributes = (attrs: string[]) => new RegExp(
-        `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\s*\\{?\\{?\\s*)([^"'\\{\\}]+?)(\\s*\\}?\\}?["'])`, 'g'
-    );
-    // Multiple Jinja macro parameters (i.e. x=foo+25) for any macro
-    static getRegexForGeneralJinjaMacroParameters = (attrs: string[]) => new RegExp(
-        `(([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+)(\\)\\s*\\})|([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+))`, 'g'
-    );
-
-    // Single XML tag attribute for specific tag
-    static getRegexForSpecificXmlTagAttribute = (attrs: string[], filter: transformFilter) => new RegExp(
-        `(<${filter.xmlTag}\\s+.*?${attrs[0]}\\s*=\\s*["']\\s*\\{?\\{?\\s*)([^"]+?)(\\s*\\}?\\}?\\s*["']\\s*.*?\\/>)`, 'sg'
-    );
-    // Single Jinja macro param for specific Jinja macro
-    static getRegexForSpecificJinjaMacroParameter = (attrs: string[], filter: transformFilter) => new RegExp(
-        `({{\\s*${filter.jinjaMacro}(\\(\\s*|.+?[,\\s]|)${attrs[0]}\\s*=\\s*)([^,\\}]+)(\\)\\s*\\}\\}|,.*?\\}\\})`, 'g'
-    );
+    filter?: string;
 
     constructor(
         targetAttributes: string[],
         operation: transformOperation,
         simplifyExpressions: boolean = true,
-        filter: (transformFilter | null) = null
+        filter?: string
     ) {
         if (process.env.VSCODE_DEBUG_MODE) {
-            console.log(`Transform.constructor -> targetAttributes=[${targetAttributes.join('|')}] simplifyExpressions=${simplifyExpressions} filter=${JSON.stringify(filter)}`);
+            console.log(`Transform.constructor -> targetAttributes=[${targetAttributes.join('|')}] simplifyExpressions=${simplifyExpressions} filter=${filter}`);
         }
 
         if (filter) {
             if (targetAttributes.length > 1) {
                 throw new Error('Currently the Transform class only supports one target attribute if a filter is present.');
             }
-            this.regexTag = Transform.getRegexForSpecificXmlTagAttribute(targetAttributes, filter);
-            this.regexMacro = Transform.getRegexForSpecificJinjaMacroParameter(targetAttributes, filter);
+            this.regexTag = alf.getRegexForSpecificXmlTagAttribute(targetAttributes, filter);
+            this.regexMacro = alf.getRegexForSpecificJinjaMacroParameter(targetAttributes, filter);
         } else {
-            this.regexTag = Transform.getRegexForGeneralXmlTagAttributes(targetAttributes);
-            this.regexMacro = Transform.getRegexForGeneralJinjaMacroParameters(targetAttributes);
+            this.regexTag = alf.getRegexForGeneralXmlTagAttributes(targetAttributes);
+            this.regexMacro = alf.getRegexForGeneralJinjaMacroParameters(targetAttributes);
         }
 
         if (process.env.VSCODE_DEBUG_MODE) {
@@ -108,7 +86,6 @@ export default class Transform {
         
         this.operation = operation;
         this.simplifyExpressions = simplifyExpressions;
-        this.encoder = null;
         this.filter = filter;
 
         if (process.env.VSCODE_DEBUG_MODE) {
@@ -138,7 +115,7 @@ export default class Transform {
         
         if (this.filter) {
             transformedText = text
-                .replace(this.regexTag, (match: string, t1: string, expr: string, t2: string) => {
+                .replace(this.regexTag, (match: string, t1: string, alt: string, expr: string, t2: string) => {
                     return this.replace(encodedTransformExpr, t1, expr, t2);
                 })
                 .replace(this.regexMacro, (match: string, t1: string, g2: string, expr: string, t2: string) => {

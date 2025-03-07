@@ -4,7 +4,7 @@
   "description": "Avara level editing enhancements for VS Code.",
   "publisher": "skedastik",
   "repository": "https://github.com/skedastik/vscode-ty-levels",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -31,8 +31,8 @@
         "title": "Regenerate Etags"
       },
       {
-        "command": "extension.pasteWithNewEtags",
-        "title": "Paste with New Etags"
+        "command": "extension.pasteWithEtags",
+        "title": "Paste with Etags"
       },
       {
         "command": "extension.toggleAutoTag",
@@ -65,6 +65,18 @@
       {
         "command": "extension.mirrorY",
         "title": "Mirror Elements Across Y Axis"
+      },
+      {
+        "command": "extension.setParam",
+        "title": "Set Param"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "extension.pasteWithEtags",
+        "key": "ctrl+v",
+        "mac": "cmd+v",
+        "when": "editorTextFocus && resourceExtname == .alf"
       }
     ]
   },

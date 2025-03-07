@@ -46,16 +46,20 @@
 
 <Wall fakeetag="fakeExistingTag" />
 
-{{ wall() }}
-{{ ramp() }}
+{{ Wall() }}
+{{ Ramp() }}
+{{ WallDoor() }}
+{{ WallSolid() }}
+{{ FreeSolid() }}
+{{ Solid() }}
 
-{{ wall(foo='bar') }}
-{{ wall() }}
-{{ wall(foo='bar') }}
-{{ wall(foo='bar') }}
-{{ wall(foo='bar', baz='qux') }}
+{{ Wall(foo='bar') }}
+{{ Wall() }}
+{{ Wall(foo='bar') }}
+{{ Wall(foo='bar') }}
+{{ Wall(foo='bar', baz='qux') }}
 
-{{ wall(etag=expression) }}
+{{ Wall(etag=expression) }}
 
 {{ irrelevantMacro() }}
 {{ irrelevantMacro() }}

@@ -1,16 +1,13 @@
 import * as vscode from 'vscode';
-import * as modifyEtag from './modify-etag';
-import * as modifyTransform from './modify-transform';
+import * as editEtag from './edit-etag';
+import * as editTransform from './edit-transform';
 
-// [TODO] This extension appears to break paste behavior. For instance, pastes
-// intended for other parts of the UI (find-replace fields, file renaming
-// fields) end up pasting in the text editor, even though the text cursor is
-// elsewhere. Also, multi-line paste is broken if the plugin is installed.
+type stringEdit = (s: string) => string;
 
-type stringModifier = (s: string) => string;
+class UserError extends Error {}
 
-// Modify the currently selected text or the entire document if no text is selected.
-const modifySelection = (modifier: stringModifier) => {
+// Edit the currently selected text or the entire document if no text is selected.
+const editSelection = (edit: stringEdit) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         return;
@@ -27,41 +24,57 @@ const modifySelection = (modifier: stringModifier) => {
         text = document.getText(selection);
     }
     editor.edit(editBuilder => {
-        editBuilder.replace(range, modifier(text));
+        editBuilder.replace(range, edit(text));
     });
 };
 
-let lastTransformExpr: string = '0';
-const TRANSLATE_PROMPT = 'Enter translation expression (e.g. \'-2\')';
+let lastInputValue: string = '0';
+const TRANSLATE_PROMPT = 'Enter translation expression. Example: "-2" or "2 * myVar"';
+const SET_PROMPT = 'Enter: {<param>,<value>,<element(optional)>}. Examples: "w,5" or "shape,bspGrenade,Goody"';
 
-type transformModifier = (transformExpr: string, text: string) => string;
+type transformEdit = (transformExpr: string, text: string, ...args: string[]) => string;
+type argSplitter = (argString: string) => string[];
 
 // Transform (translate/mirror etc.) elements
-const transformSelection = async (modifier: transformModifier, prompt: string | null = null) => {
-    let expr = '';
-    if (prompt) {
-        const input = await vscode.window.showInputBox({
-            prompt,
-            value: lastTransformExpr
-        });
-        if (!input) {
+const transformSelection = async (edit: transformEdit, prompt?: string, splitter?: argSplitter) => {
+    try {
+        let expr = '';
+        let args: string[] = [];
+        if (prompt) {
+            const input = await vscode.window.showInputBox({
+                prompt,
+                value: lastInputValue
+            });
+            if (!input) {
+                return;
+            }
+            expr = input;
+            if (splitter) {
+                args = splitter(input);
+                expr = args[0];
+                args = args.slice(1);
+            }
+        }
+        editSelection((text) => edit(text, expr, ...args));
+        lastInputValue = expr;
+    }
+    catch (error) {
+        if (error instanceof UserError) {
+            vscode.window.showInformationMessage(error.message);
             return;
         }
-        expr = input;
-    }
-    try {
-        modifySelection((text) => modifier(text, expr));
-        lastTransformExpr = expr;
-    }
-    catch {
-        vscode.window.showInformationMessage('Invalid expression.');
+        if (error instanceof Error) {
+            console.log(error.stack);
+        }
+        vscode.window.showInformationMessage('Internal error.');
+        throw error;
     }
 };
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => modifySelection(modifyEtag.addEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => modifySelection(modifyEtag.removeEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => modifySelection(modifyEtag.regenerateEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection(editEtag.addEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection(editEtag.removeEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection(editEtag.regenerateEtags)));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
         const editor = vscode.window.activeTextEditor;
@@ -93,19 +106,23 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.pasteWithNewEtags', async () => {
+    context.subscriptions.push(vscode.commands.registerCommand('extension.pasteWithEtags', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return;
         }
-        const clipboardText = await vscode.env.clipboard.readText();
-        const text = modifyEtag.regenerateEtags(clipboardText);
-        editor.edit(editBuilder => {
-            editBuilder.replace(editor.selection, text);
-        });
-    }));
-    context.subscriptions.push(vscode.commands.registerCommand('editor.action.clipboardPasteAction', () => {
-        vscode.commands.executeCommand('extension.pasteWithNewEtags');
+        const document = editor.document;
+        const autotagEnabled = editEtag.isAutotagEnabled(document.getText());
+        if (autotagEnabled) {
+            const clipboardText = await vscode.env.clipboard.readText();
+            let taggedText = editEtag.regenerateEtags(clipboardText);
+            taggedText = editEtag.addEtags(taggedText);
+            await vscode.env.clipboard.writeText(taggedText);
+            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+            await vscode.env.clipboard.writeText(clipboardText);
+            return;
+        }
+        await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
     }));
  
     context.subscriptions.push(vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
@@ -114,10 +131,9 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         const document = editor.document;
-        const firstLine = document.lineAt(0).text;
-        if (modifyEtag.AUTOTAG_REGEX.test(firstLine)) {
-            const text = document.getText();
-            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), modifyEtag.addEtags(text));
+        const text = document.getText();
+        if (editEtag.isAutotagEnabled(text)) {
+            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), editEtag.addEtags(text));
             event.waitUntil(Promise.resolve([textEdit]));   
         }
     }));
@@ -130,9 +146,9 @@ export function activate(context: vscode.ExtensionContext) {
         const document = editor.document;
         const range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
         let text = document.getText();
-        text = modifyEtag.toggleAutoTagComment(text);
-        if (modifyEtag.AUTOTAG_REGEX.test(text)) {
-            text = modifyEtag.addEtags(text);
+        text = editEtag.toggleAutoTagComment(text);
+        if (editEtag.AUTOTAG_REGEX.test(text)) {
+            text = editEtag.addEtags(text);
             vscode.window.showInformationMessage('Autotag enabled.');
         } else {
             vscode.window.showInformationMessage('Autotag disabled.');
@@ -142,31 +158,46 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => transformSelection(
-        modifyTransform.translateX,
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', () => transformSelection(
+        editTransform.translateX,
         TRANSLATE_PROMPT
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', async () => transformSelection(
-        modifyTransform.translateZ,
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', () => transformSelection(
+        editTransform.translateZ,
         TRANSLATE_PROMPT
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', async () => transformSelection(
-        modifyTransform.translateY,
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', () => transformSelection(
+        editTransform.translateY,
         TRANSLATE_PROMPT
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', async () => transformSelection(
-        modifyTransform.mirrorX
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', () => transformSelection(
+        editTransform.mirrorX
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', async () => transformSelection(
-        modifyTransform.mirrorZ
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', () => transformSelection(
+        editTransform.mirrorZ
     )));
     
-    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', async () => transformSelection(
-        modifyTransform.mirrorY
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', () => transformSelection(
+        editTransform.mirrorY
+    )));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.setParam', () => transformSelection(
+        (text: string, valueExpr: string, ...args: string[]) => editTransform.set(text, valueExpr, args[0], args[1]),
+        SET_PROMPT,
+        (argString) => {
+            let args = argString.split(',');
+            if (args.length < 2) {
+                throw new UserError('Invalid input. Expected at least two comma-separated arguments.');
+            }
+            let param = args[0];
+            args[0] = args[1];
+            args[1] = param;
+            return args;
+        }
     )));
 }
 
