@@ -85,7 +85,11 @@ export default class Transform {
         operation: transformOperation,
         simplifyExpressions: boolean = true,
         filter: (transformFilter | null) = null
-    ) { 
+    ) {
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`Transform.constructor -> targetAttributes=[${targetAttributes.join('|')}] simplifyExpressions=${simplifyExpressions} filter=${JSON.stringify(filter)}`);
+        }
+
         if (filter) {
             if (targetAttributes.length > 1) {
                 throw new Error('Currently the Transform class only supports one target attribute if a filter is present.');
@@ -96,19 +100,41 @@ export default class Transform {
             this.regexTag = Transform.getRegexForGeneralXmlTagAttributes(targetAttributes);
             this.regexMacro = Transform.getRegexForGeneralJinjaMacroParameters(targetAttributes);
         }
+
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`Transform.constructor -> regexTag=${this.regexTag.toString()}`);
+            console.log(`Transform.constructor -> regexMacro=${this.regexMacro.toString()}`);
+        }
+        
         this.operation = operation;
         this.simplifyExpressions = simplifyExpressions;
         this.encoder = null;
         this.filter = filter;
+
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`--`);
+        }
     }
 
     apply(text: string, transformExpr: string = '') {
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`Transform.apply -> text=`);
+            console.log('-- text begin');
+            console.log(text);
+            console.log('-- text end');
+            console.log(`Transform.apply -> transformExpr="${transformExpr}"`);
+        }
+
         if (this.simplifyExpressions) {
             // ExpressionEncoders should not be reused across different input expressions, so instantiate a new one
             this.encoder = new ExpressionEncoder();
         }
         const encodedTransformExpr = this.encoder ? this.encoder.encode(transformExpr) : transformExpr;
         let transformedText;
+
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`Transform.apply -> encodedTransformExpr="${encodedTransformExpr}"`);
+        }
         
         if (this.filter) {
             transformedText = text
@@ -131,13 +157,35 @@ export default class Transform {
                 });
         }
 
-        return this.encoder ? this.encoder.decode(transformedText) : transformedText;
+        const decodedText = this.encoder ? this.encoder.decode(transformedText) : transformedText;
+
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`Transform.apply -> decodedText=`);
+            console.log('-- decodedText begin');
+            console.log(decodedText);
+            console.log('-- decodedText end');
+        }
+
+        return decodedText;
     }
 
     private replace(transformExpr: string, t1: string, expr: string, t2: string) {
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`Transform.replace -> transformExpr="${transformExpr}"`);
+            console.log(`Transform.replace -> t1="${t1}"`);
+            console.log(`Transform.replace -> expr="${expr}"`);
+            console.log(`Transform.replace -> t2="${t2}"`);
+        }
         const encodedExpr = this.encoder ? this.encoder.encode(expr) : expr;
         const appliedExpr = this.operation(encodedExpr, transformExpr);
         const simplifiedExpr = this.simplifyExpressions ? math.simplify(appliedExpr, simplificationRules, {}, { exactFractions: false }).toString() : appliedExpr;
-        return [t1, simplifiedExpr, t2].join('');
+        const replacementString = [t1, simplifiedExpr, t2].join('');
+
+        if (process.env.VSCODE_DEBUG_MODE) {
+            console.log(`Transform.replace -> replacementString="${replacementString}"`);
+            console.log(`--`);
+        }
+
+        return replacementString;
     }
 }
