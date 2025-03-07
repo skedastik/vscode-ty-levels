@@ -10,7 +10,7 @@
 
 const math = require('mathjs');
 
-const rules = [
+export const rules = [
     // simplifyCore,
     // { l: 'n+0', r: 'n' },     // simplifyCore
     // { l: 'n^0', r: '1' },     // simplifyCore
@@ -205,5 +205,3 @@ const rules = [
 
     { l: '0*n', r: '0' }
 ];
-
-export default rules;

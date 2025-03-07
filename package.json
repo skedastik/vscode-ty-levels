@@ -53,6 +53,18 @@
       {
         "command": "extension.translateY",
         "title": "Translate Elements Along Y Axis"
+      },
+      {
+        "command": "extension.mirrorX",
+        "title": "Mirror Elements Across X Axis"
+      },
+      {
+        "command": "extension.mirrorZ",
+        "title": "Mirror Elements Across Z Axis"
+      },
+      {
+        "command": "extension.mirrorY",
+        "title": "Mirror Elements Across Y Axis"
       }
     ]
   },
