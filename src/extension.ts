@@ -2,6 +2,11 @@ import * as vscode from 'vscode';
 import * as modifyEtag from './modify-etag';
 import * as modifyTransform from './modify-transform';
 
+// [TODO] This extension appears to break paste behavior. For instance, pastes
+// intended for other parts of the UI (find-replace fields, file renaming
+// fields) end up pasting in the text editor, even though the text cursor is
+// elsewhere. Also, multi-line paste is broken if the plugin is installed.
+
 type stringModifier = (s: string) => string;
 
 // Modify the currently selected text or the entire document if no text is selected.
