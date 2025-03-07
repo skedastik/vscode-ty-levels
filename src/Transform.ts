@@ -49,7 +49,7 @@ class ExpressionEncoder {
 
 type transformOperation = (transformExpr: string, currentExpr: string) => string;
 
-export default class Transformer {
+export default class Transform {
     rgxXar: RegExp;
     rgxXaj: RegExp;
     rgxPjm: RegExp;
@@ -74,14 +74,14 @@ export default class Transformer {
         operation: transformOperation,
         doEncodeExpressions: boolean
     ) { 
-        this.rgxXar = Transformer.getRegexForXmlAttributes(targetAttributes);
-        this.rgxXaj = Transformer.getRegexForXmlAttributesWithJinjaExpressions(targetAttributes);
-        this.rgxPjm = Transformer.getRegexForJinjaMacroParameters(targetAttributes);
+        this.rgxXar = Transform.getRegexForXmlAttributes(targetAttributes);
+        this.rgxXaj = Transform.getRegexForXmlAttributesWithJinjaExpressions(targetAttributes);
+        this.rgxPjm = Transform.getRegexForJinjaMacroParameters(targetAttributes);
         this.operation = operation;
         this.encoder = doEncodeExpressions ? new ExpressionEncoder : null;
     }
 
-    transform(transformExpr: string, text: string) {
+    apply(transformExpr: string, text: string) {
         const encodedTransformExpr = this.encoder ? this.encoder.encode(transformExpr) : transformExpr;
         const transformedText = text
             .replace(this.rgxXar, (match: string, t1: string, alt: string, expr: string, t2: string) => {

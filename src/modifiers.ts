@@ -1,4 +1,4 @@
-import Transformer from './Transformer';
+import Transform from './Transform';
 
 const ETAG_LENGTH = 7;
 
@@ -65,14 +65,21 @@ export const toggleAutoTagComment = (text: string) => AUTOTAG_REGEX.test(text)
 export type transformModifier = (transformExpr: string, text: string) => string;
 
 const additionOperation = (transformExpr: string, currentExpr: string) => `(${currentExpr}) + ${transformExpr}`;
+const multiplicationOperation = (transformExpr: string, currentExpr: string) => `(${currentExpr}) * ${transformExpr}`;
 
-const translateXTransformer = new Transformer(['cx', 'x', 'xx'], additionOperation, true);
-const translateZTransformer = new Transformer(['cz', 'z', 'zz'], additionOperation, true);
-const translateYTransformer = new Transformer(['y', 'yy'], additionOperation, true);
+const xAttributeNames = ['cx', 'x', 'xx'];
+const zAttributeNames = ['cz', 'z', 'zz'];
+const yAttributeNames = ['y', 'yy'];
 
-export const translateX = (transformExpr: string, text: string) => translateXTransformer.transform(transformExpr, text);
-export const translateZ = (transformExpr: string, text: string) => translateZTransformer.transform(transformExpr, text);
-export const translateY = (transformExpr: string, text: string) => translateYTransformer.transform(transformExpr, text);
+const xAdd = new Transform(xAttributeNames, additionOperation, true);
+const zAdd = new Transform(zAttributeNames, additionOperation, true);
+const yAdd = new Transform(yAttributeNames, additionOperation, true);
+
+export const translateX = (transformExpr: string, text: string) => xAdd.apply(transformExpr, text);
+export const translateZ = (transformExpr: string, text: string) => zAdd.apply(transformExpr, text);
+export const translateY = (transformExpr: string, text: string) => yAdd.apply(transformExpr, text);
+
+// const xMultiply = new Transform(['cx', 'x', 'xx'], additionOperation, true);
 
 // export const mirrorX = (text: string) => {
 //     const rgxTranslateXar = Transformer.getRegexForXmlAttributes(['cx', 'x', 'xx']);
