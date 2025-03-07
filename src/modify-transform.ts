@@ -1,30 +1,30 @@
 import Transform from './Transform';
 
-const additionOperation = (transformExpr: string, currentExpr: string) => `(${currentExpr}) + ${transformExpr}`;
-const multiplicationOperation = (transformExpr: string, currentExpr: string) => `(${currentExpr}) * ${transformExpr}`;
+const additionOperation = (currentExpr: string, transformExpr: (string | null)) => `(${currentExpr}) + ${transformExpr}`;
+const multiplicationOperation = (currentExpr: string, transformExpr: (string | null)) => `(${currentExpr}) * ${transformExpr}`;
+const angleMirrorOperation = (currentExpr: string) => {
+    let angle = Number.parseFloat(currentExpr);
+    if (Number.isNaN(angle)) {
+        return currentExpr;
+    }
+    angle -= 2 * angle;
+    angle = angle <= 0 ? -angle : 360 - angle;
+    return angle.toString();
+};
 
 const xAttributes = ['cx', 'x', 'xx'];
 const zAttributes = ['cz', 'z', 'zz'];
 const yAttributes = ['y', 'yy'];
+const angleAttributes = ['angle'];
 
 const xAdd = new Transform(xAttributes, additionOperation, true);
 const zAdd = new Transform(zAttributes, additionOperation, true);
 const yAdd = new Transform(yAttributes, additionOperation, true);
-
-export const translateX = (transformExpr: string, text: string) => xAdd.apply(transformExpr, text);
-export const translateZ = (transformExpr: string, text: string) => zAdd.apply(transformExpr, text);
-export const translateY = (transformExpr: string, text: string) => yAdd.apply(transformExpr, text);
-
 const xMultiply = new Transform(xAttributes, multiplicationOperation, true);
+const angleMirrorZ = new Transform(angleAttributes, angleMirrorOperation);
 
-// const angleMirrorZ = new Transform(angleAttributes, (transformExpr, currentExpr));
+export const translateX = (text: string, transformExpr: string) => xAdd.apply(text, transformExpr);
+export const translateZ = (text: string, transformExpr: string) => zAdd.apply(text, transformExpr);
+export const translateY = (text: string, transformExpr: string) => yAdd.apply(text, transformExpr);
 
-// export const mirrorX = (text: string) => {
-//     text = xMultiply.apply('-1', text);
-    
-//     const rgxMirrorAxr = Transformer.getRegexForXmlAttributes(['angle']);
-//     const rgxMirrorAxj = Transformer.getRegexForXmlAttributesWithJinjaExpressions(['angle']);
-//     const rgxMirrorPjm = Transformer.getRegexForJinjaMacroParameters(['angle']);
-
-//     text = transform(rgxMirrorAxr, rgxMirrorAxj, rgxMirrorPjm, null, '+', '[TODO] angle goes here?', text);
-// };
+export const mirrorZ = (text: string) => xMultiply.apply('-1', angleMirrorZ.apply(text));

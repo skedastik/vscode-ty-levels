@@ -47,7 +47,7 @@ class ExpressionEncoder {
     }
 }
 
-type transformOperation = (transformExpr: string, currentExpr: string) => string;
+type transformOperation = (currentExpr: string, transformExpr: (string | null)) => string;
 
 export default class Transform {
     rgxXar: RegExp;
@@ -55,6 +55,7 @@ export default class Transform {
     rgxPjm: RegExp;
     encoder: (ExpressionEncoder | null);
     operation: transformOperation;
+    simplifyExpressions: boolean;
 
     // normal XML attributes (i.e. `x="25"`)
     static getRegexForXmlAttributes = (attrs: string[]) => new RegExp(
@@ -72,17 +73,22 @@ export default class Transform {
     constructor(
         targetAttributes: string[],
         operation: transformOperation,
-        doEncodeExpressions: boolean
+        simplifyExpressions: boolean = false
     ) { 
         this.rgxXar = Transform.getRegexForXmlAttributes(targetAttributes);
         this.rgxXaj = Transform.getRegexForXmlAttributesWithJinjaExpressions(targetAttributes);
         this.rgxPjm = Transform.getRegexForJinjaMacroParameters(targetAttributes);
         this.operation = operation;
-        this.encoder = doEncodeExpressions ? new ExpressionEncoder : null;
+        this.simplifyExpressions = simplifyExpressions;
+        this.encoder = null;
     }
 
-    apply(transformExpr: string, text: string) {
-        const encodedTransformExpr = this.encoder ? this.encoder.encode(transformExpr) : transformExpr;
+    apply(text: string, transformExpr: (string | null) = null) {
+        if (this.simplifyExpressions) {
+            // ExpressionEncoders should not be reused across different input expressions, so instantiate a new one
+            this.encoder = new ExpressionEncoder();
+        }
+        const encodedTransformExpr = this.encoder && transformExpr ? this.encoder.encode(transformExpr) : transformExpr;
         const transformedText = text
             .replace(this.rgxXar, (match: string, t1: string, alt: string, expr: string, t2: string) => {
                 return this.replace(encodedTransformExpr, t1, expr, t2);
@@ -99,10 +105,10 @@ export default class Transform {
         return this.encoder ? this.encoder.decode(transformedText) : transformedText;
     }
 
-    private replace(transformExpr: string, t1: string, expr: string, t2: string) {
+    private replace(transformExpr: (string | null), t1: string, expr: string, t2: string) {
         const encodedExpr = this.encoder ? this.encoder.encode(expr) : expr;
-        const appliedExpr = this.operation(transformExpr, encodedExpr);
-        const simplifiedExpr = math.simplify(appliedExpr, simplificationRules, {}, { exactFractions: false }).toString();
+        const appliedExpr = this.operation(encodedExpr, transformExpr);
+        const simplifiedExpr = this.simplifyExpressions ? math.simplify(appliedExpr, simplificationRules, {}, { exactFractions: false }).toString() : appliedExpr;
         return [t1, simplifiedExpr, t2].join('');
     }
 }
