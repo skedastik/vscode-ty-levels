@@ -12,16 +12,13 @@ type stringModifier = (s: string) => string;
 // Modify the currently selected text or the entire document if no text is selected.
 const modifySelection = (modifier: stringModifier) => {
     const editor = vscode.window.activeTextEditor;
-
     if (!editor) {
         return;
     }
-
     const document = editor.document;
     const selection = editor.selection;
     let range: vscode.Range;
     let text: string;
-
     if (selection.isEmpty) {
         range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
         text = document.getText();
@@ -29,7 +26,6 @@ const modifySelection = (modifier: stringModifier) => {
         range = new vscode.Range(selection.start, selection.end);
         text = document.getText(selection);
     }
-
     editor.edit(editBuilder => {
         editBuilder.replace(range, modifier(text));
     });
@@ -42,15 +38,16 @@ type transformModifier = (transformExpr: string, text: string) => string;
 
 // Transform (translate/mirror etc.) elements
 const transformSelection = async (modifier: transformModifier, prompt: string | null = null) => {
-    let expr: string | undefined = '';
+    let expr = '';
     if (prompt) {
-        expr = await vscode.window.showInputBox({
+        const input = await vscode.window.showInputBox({
             prompt,
             value: lastTransformExpr
         });
-        if (expr === undefined || expr === '0' || expr === '') {
+        if (!input) {
             return;
         }
+        expr = input;
     }
     try {
         modifySelection((text) => modifier(text, expr));
@@ -68,21 +65,16 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
         const editor = vscode.window.activeTextEditor;
-
         if (!editor) {
             return;
         }
-
         const document = editor.document;
         const text = document.getText();
         const etag = args['etag'];
-
         if (!etag) {
             return;
         }
-
         const index = text.indexOf(etag);
-
         if (index !== -1) {
             const start = document.positionAt(index);
             const end = document.positionAt(index + etag.length);
@@ -92,6 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage('Etag not found.');
         }
     }));
+
     context.subscriptions.push(vscode.window.registerUriHandler({
         handleUri(uri: vscode.Uri) {
             const params = new URLSearchParams(uri.query);
@@ -102,14 +95,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.pasteWithNewEtags', async () => {
         const editor = vscode.window.activeTextEditor;
-
         if (!editor) {
             return;
         }
-
         const clipboardText = await vscode.env.clipboard.readText();
         const text = modifyEtag.regenerateEtags(clipboardText);
-
         editor.edit(editBuilder => {
             editBuilder.replace(editor.selection, text);
         });
@@ -120,14 +110,11 @@ export function activate(context: vscode.ExtensionContext) {
  
     context.subscriptions.push(vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
         const editor = vscode.window.activeTextEditor;
-        
         if (!editor) {
             return;
         }
-
         const document = editor.document;
         const firstLine = document.lineAt(0).text;
-
         if (modifyEtag.AUTOTAG_REGEX.test(firstLine)) {
             const text = document.getText();
             const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), modifyEtag.addEtags(text));
@@ -137,15 +124,12 @@ export function activate(context: vscode.ExtensionContext) {
     
     context.subscriptions.push(vscode.commands.registerCommand('extension.toggleAutoTag', () => {
         const editor = vscode.window.activeTextEditor;
-
         if (!editor) {
             return;
         }
-
         const document = editor.document;
         const range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
         let text = document.getText();
-
         text = modifyEtag.toggleAutoTagComment(text);
         if (modifyEtag.AUTOTAG_REGEX.test(text)) {
             text = modifyEtag.addEtags(text);
@@ -153,7 +137,6 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
             vscode.window.showInformationMessage('Autotag disabled.');
         }
-
         editor.edit(editBuilder => {
             editBuilder.replace(range, text);
         });
@@ -163,13 +146,27 @@ export function activate(context: vscode.ExtensionContext) {
         modifyTransform.translateX,
         TRANSLATE_PROMPT
     )));
+
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', async () => transformSelection(
         modifyTransform.translateZ,
         TRANSLATE_PROMPT
     )));
+
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', async () => transformSelection(
         modifyTransform.translateY,
         TRANSLATE_PROMPT
+    )));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', async () => transformSelection(
+        modifyTransform.mirrorX
+    )));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', async () => transformSelection(
+        modifyTransform.mirrorZ
+    )));
+    
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', async () => transformSelection(
+        modifyTransform.mirrorY
     )));
 }
 
