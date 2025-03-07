@@ -41,16 +41,19 @@ const TRANSLATE_PROMPT = 'Enter translation expression (e.g. \'-2\')';
 type transformModifier = (transformExpr: string, text: string) => string;
 
 // Transform (translate/mirror etc.) elements
-const transformSelection = async (modifier: transformModifier, prompt: string) => {
-    const expr = await vscode.window.showInputBox({
-        prompt,
-        value: lastTransformExpr
-    });
-    if (expr === undefined || expr === '0' || expr === '') {
-        return;
+const transformSelection = async (modifier: transformModifier, prompt: string | null = null) => {
+    let expr: string | undefined = '';
+    if (prompt) {
+        expr = await vscode.window.showInputBox({
+            prompt,
+            value: lastTransformExpr
+        });
+        if (expr === undefined || expr === '0' || expr === '') {
+            return;
+        }
     }
     try {
-        modifySelection(modifier.bind(null, expr));
+        modifySelection((text) => modifier(text, expr));
         lastTransformExpr = expr;
     }
     catch {
