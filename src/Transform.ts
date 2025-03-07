@@ -49,38 +49,57 @@ class ExpressionEncoder {
 
 type transformOperation = (currentExpr: string, transformExpr: string) => string;
 
+type transformFilter = {
+    xmlTag: string,
+    jinjaMacro: string
+};
+
 export default class Transform {
-    rgxXar: RegExp;
-    rgxXaj: RegExp;
-    rgxPjm: RegExp;
+    regexTag: RegExp;
+    regexMacro: RegExp;
     encoder: (ExpressionEncoder | null);
     operation: transformOperation;
     simplifyExpressions: boolean;
+    filter: transformFilter | null;
 
-    // normal XML attributes (i.e. `x="25"`)
-    static getRegexForXmlAttributes = (attrs: string[]) => new RegExp(
-        `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\s*)([^"'\\{\\}]+?)(\\s*["'])`, 'g'
+    // Multiple XML tag attributes (i.e. `x="0"` or `x="{{ myVar + 2 }}"`) for any tag
+    static getRegexForGeneralXmlTagAttributes = (attrs: string[]) => new RegExp(
+        `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\s*\\{?\\{?\\s*)([^"'\\{\\}]+?)(\\s*\\}?\\}?["'])`, 'g'
     );
-    // XML attributes with Jinja interpolations (i.e. `x="{{ foo + 25 }}"`)
-    static getRegexForXmlAttributesWithJinjaExpressions = (attrs: string[]) => new RegExp(
-        `([\\s"'](${attrs.join('|')})\\s*=\\s*["']\\{\\{\\s*)([^"'\\{\\}]+?)(\\s*\\}\\}["'])`, 'g'
-    );
-    // Jinja macro parameters (i.e. x=foo+25)
-    static getRegexForJinjaMacroParameters = (attrs: string[]) => new RegExp(
+    // Multiple Jinja macro parameters (i.e. x=foo+25) for any macro
+    static getRegexForGeneralJinjaMacroParameters = (attrs: string[]) => new RegExp(
         `(([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+)(\\)\\s*\\})|([\\s"',\\(](${attrs.join('|')})\\s*=\\s*)([^"',\\{\\}]+))`, 'g'
+    );
+
+    // Single XML tag attribute for specific tag
+    static getRegexForSpecificXmlTagAttribute = (attrs: string[], filter: transformFilter) => new RegExp(
+        `(<${filter.xmlTag}\\s+.*?${attrs[0]}\\s*=\\s*["']\\s*\\{?\\{?\\s*)([^"]+?)(\\s*\\}?\\}?\\s*["']\\s*.*?\\/>)`, 'sg'
+    );
+    // Single Jinja macro param for specific Jinja macro
+    static getRegexForSpecificJinjaMacroParameter = (attrs: string[], filter: transformFilter) => new RegExp(
+        `({{\\s*${filter.jinjaMacro}(\\(\\s*|.+?[,\\s]|)${attrs[0]}\\s*=\\s*)([^,\\}]+)(\\)\\s*\\}\\}|,.*?\\}\\})`, 'g'
     );
 
     constructor(
         targetAttributes: string[],
         operation: transformOperation,
-        simplifyExpressions: boolean = true
+        simplifyExpressions: boolean = true,
+        filter: (transformFilter | null) = null
     ) { 
-        this.rgxXar = Transform.getRegexForXmlAttributes(targetAttributes);
-        this.rgxXaj = Transform.getRegexForXmlAttributesWithJinjaExpressions(targetAttributes);
-        this.rgxPjm = Transform.getRegexForJinjaMacroParameters(targetAttributes);
+        if (filter) {
+            if (targetAttributes.length > 1) {
+                throw new Error('Currently the Transform class only supports one target attribute if a filter is present.');
+            }
+            this.regexTag = Transform.getRegexForSpecificXmlTagAttribute(targetAttributes, filter);
+            this.regexMacro = Transform.getRegexForSpecificJinjaMacroParameter(targetAttributes, filter);
+        } else {
+            this.regexTag = Transform.getRegexForGeneralXmlTagAttributes(targetAttributes);
+            this.regexMacro = Transform.getRegexForGeneralJinjaMacroParameters(targetAttributes);
+        }
         this.operation = operation;
         this.simplifyExpressions = simplifyExpressions;
         this.encoder = null;
+        this.filter = filter;
     }
 
     apply(text: string, transformExpr: string = '') {
@@ -89,19 +108,29 @@ export default class Transform {
             this.encoder = new ExpressionEncoder();
         }
         const encodedTransformExpr = this.encoder ? this.encoder.encode(transformExpr) : transformExpr;
-        const transformedText = text
-            .replace(this.rgxXar, (match: string, t1: string, alt: string, expr: string, t2: string) => {
-                return this.replace(encodedTransformExpr, t1, expr, t2);
-            })
-            .replace(this.rgxXaj, (match: string, t1: string, alt: string, expr: string, t2: string) => {
-                return this.replace(encodedTransformExpr, t1, expr, t2);
-            })
-            .replace(this.rgxPjm, (match: string, g1: string, g2: string, g3: string, g4: string, g5: string, g6: string, g7: string, g8: string) => {
-                const t1 = g8 ? g6 : g2;
-                const expr = g8 ? g8 : g4;
-                const t2 = g8 ? '' : g5;
-                return this.replace(encodedTransformExpr, t1, expr, t2);
-            });
+        let transformedText;
+        
+        if (this.filter) {
+            transformedText = text
+                .replace(this.regexTag, (match: string, t1: string, expr: string, t2: string) => {
+                    return this.replace(encodedTransformExpr, t1, expr, t2);
+                })
+                .replace(this.regexMacro, (match: string, t1: string, g2: string, expr: string, t2: string) => {
+                    return this.replace(encodedTransformExpr, t1, expr, t2);
+                });
+        } else {
+            transformedText = text
+                .replace(this.regexTag, (match: string, t1: string, alt: string, expr: string, t2: string) => {
+                    return this.replace(encodedTransformExpr, t1, expr, t2);
+                })
+                .replace(this.regexMacro, (match: string, g1: string, g2: string, g3: string, g4: string, g5: string, g6: string, g7: string, g8: string) => {
+                    const t1 = g8 ? g6 : g2;
+                    const expr = g8 ? g8 : g4;
+                    const t2 = g8 ? '' : g5;
+                    return this.replace(encodedTransformExpr, t1, expr, t2);
+                });
+        }
+
         return this.encoder ? this.encoder.decode(transformedText) : transformedText;
     }
 

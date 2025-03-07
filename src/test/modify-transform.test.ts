@@ -56,4 +56,10 @@ suite('Modifiers Test Suite', () => {
         const expected = fs.readFileSync('src/test/fixtures/transform.mirror.x.expected.alf', 'utf-8');
         assert.strictEqual(mod.mirrorX(input), expected);
     });
+
+    test('mirrorY', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.mirror.y.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.mirror.y.expected.alf', 'utf-8');
+        assert.strictEqual(mod.mirrorY(input), expected);
+    });
 });
