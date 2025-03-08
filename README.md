@@ -16,15 +16,31 @@ You will be prompted to enter a translation expression. Your expression can be a
 
 ##### `Translate Elements Along X Axis`
 
-Add to cx/x/xx attributes.
+Add to **cx/x/xx** attributes.
 
 ##### `Translate Elements Along Z Axis`
 
-Add to cz/z/zz attributes.
+Add to **cz/z/zz** attributes.
 
 ##### `Translate Elements Along Y Axis`
 
-Add to y/yy attributes.
+Add to **y/yy** attributes.
+
+#### Mirroring
+
+Mirror elements across axes centered at the world origin (0,0,0).
+
+##### `Mirror Elements Across X Axis`
+
+Multiply **cz/z/zz** attributes by -1. Reflect **angle** attributes across the X axis.
+
+##### `Mirror Elements Across Z Axis`
+
+Multiply **cx/x/xx** attributes by -1. Reflect **angle** attributes across the Z axis.
+
+##### `Mirror Elements Across Y Axis`
+
+Multiply **y/yy** attributes by -1. Reflect ramp **angle** attributes across the Y axis. The **angle** attribute for elements other than ramps are unaffected.
 
 ### Tagging
 
