@@ -1,0 +1,130 @@
+{# plain xml ---------------------------------------------------------------- #}
+
+<Foo />
+<Foo j='2' />
+<Foo j="2" />
+<Foo j="" />
+<Foo j=" " />
+<Foo fakej="2" />
+<Foo jfake="2" />
+<Foo i="j" k="j" />
+<Foo jj="2" />
+<Foo jj="2" j="2" />
+<Foo j="2" jj="2" />
+<Foo j="2" i="0" />
+<Foo i="0" j="2" />
+<Foo i="0" j="2" k="0" />
+<Foo
+    i="0"
+    j="2"
+    k="0"
+/>
+
+<Bar />
+<Bar j='2' />
+<Bar j="2" />
+<Bar j="" />
+<Bar j=" " />
+<Bar fakej="2" />
+<Bar jfake="2" />
+<Bar i="j" k="j" />
+<Bar jj="2" />
+<Bar jj="2" j="2" />
+<Bar j="2" jj="2" />
+<Bar j="2" i="0" />
+<Bar i="0" j="2" />
+<Bar i="0" j="2" k="0" />
+<Bar
+    i="0"
+    j="2"
+    k="0"
+/>
+
+{# xml with jinja ejpressions ----------------------------------------------- #}
+
+<Foo />
+<Foo j='{{ 2 }}' />
+<Foo j="{{ 2 }}" />
+<Foo j="{{}}" />
+<Foo j="{{ }}" />
+<Foo fakej="{{ 2 }}" />
+<Foo jfake="{{ 2 }}" />
+<Foo i="{{ j }}" k="{{ j }}" />
+<Foo jj="{{ 2 }}" />
+<Foo jj="{{ 2 }}" j="{{ 2 }}" />
+<Foo j="{{ 2 }}" jj="{{ 2 }}" />
+<Foo j="{{ 2 }}" i="{{ 0 }}" />
+<Foo i="{{ 0 }}" j="{{ 2 }}" />
+<Foo i="{{ 0 }}" j="{{ 2 }}" k="{{ 0 }}" />
+<Foo
+    i="{{ 0 }}"
+    j="{{ 2 }}"
+    k="{{ 0 }}"
+/>
+<Foo j="{{2}}" />
+<Foo j="   {{   2   }}   " />
+
+<Bar />
+<Bar j='{{ 2 }}' />
+<Bar j="{{ 2 }}" />
+<Bar j="{{}}" />
+<Bar j="{{ }}" />
+<Bar fakej="{{ 2 }}" />
+<Bar jfake="{{ 2 }}" />
+<Bar i="{{ j }}" k="{{ j }}" />
+<Bar jj="{{ 2 }}" />
+<Bar jj="{{ 2 }}" j="{{ 2 }}" />
+<Bar j="{{ 2 }}" jj="{{ 2 }}" />
+<Bar j="{{ 2 }}" i="{{ 0 }}" />
+<Bar i="{{ 0 }}" j="{{ 2 }}" />
+<Bar i="{{ 0 }}" j="{{ 2 }}" k="{{ 0 }}" />
+<Bar
+    i="{{ 0 }}"
+    j="{{ 2 }}"
+    k="{{ 0 }}"
+/>
+<Bar j="{{2}}" />
+<Bar j="   {{   2   }}   " />
+
+{# jinja macros ------------------------------------------------------------- #}
+
+{{ foo() }}
+{{ foo( ) }}
+{{ foo(j=2) }}
+{{ foo(fakej=2) }}
+{{ foo(jfake=2) }}
+{{ foo(i=j, k=j) }}
+{{ foo(jj=2) }}
+{{ foo(jj=2, j=2) }}
+{{ foo(j=2, jj=2) }}
+{{ foo(j=2, i=0) }}
+{{ foo(i=0, j=2)}}
+{{ foo(i=0, j=2, k=0) }}
+{{ foo(   j   =   0   ) }}
+{{foo(j=2,jj=4)}}
+{{foo(jj=4,j=2)}}
+{{ foo(j=2+a) }}
+{{ foo(j=2+cos(a)) }}
+{{ foo(j=2+abs(cos(a))) }}
+{{ foo(j=2+abs(math.cos(a))) }}
+{{foo(j=2+abs(math.cos(a)),i=2*j,jj=fn((fn(b)-fn(c))))}}
+
+{{ bar() }}
+{{ bar(j=2) }}
+{{ bar(fakej=2) }}
+{{ bar(jfake=2) }}
+{{ bar(i=j, k=j) }}
+{{ bar(jj=2) }}
+{{ bar(jj=2, j=2) }}
+{{ bar(j=2, jj=2) }}
+{{ bar(j=2, i=0) }}
+{{ bar(i=0, j=2)}}
+{{ bar(i=0, j=2, k=0) }}
+{{ bar(   j   =   0   ) }}
+{{bar(j=2,jj=4)}}
+{{bar(jj=4,j=2)}}
+{{ bar(j=2+a) }}
+{{ bar(j=2+cos(a)) }}
+{{ bar(j=2+abs(cos(a))) }}
+{{ bar(j=2+abs(math.cos(a))) }}
+{{bar(j=2+abs(math.cos(a)),i=2*j,jj=fn((fn(b)-fn(c))))}}

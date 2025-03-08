@@ -116,7 +116,7 @@ export default class Transform {
         
         if (this.filter) {
             transformedText = text
-                .replace(this.regexTag, (match: string, t1: string, expr: string, t2: string) => {
+                .replace(this.regexTag, (match: string, t1: string, alt: string, expr: string, t2: string) => {
                     return this.replace(encodedTransformExpr, t1, expr, t2);
                 })
                 .replace(this.regexMacro, (match: string, t1: string, g2: string, expr: string, t2: string) => {
