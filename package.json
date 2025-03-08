@@ -66,6 +66,14 @@
         "command": "extension.mirrorY",
         "title": "Mirror Elements Across Y Axis"
       }
+    ],
+    "keybindings": [
+      {
+        "command": "extension.pasteWithNewEtags",
+        "key": "ctrl+v",
+        "mac": "cmd+v",
+        "when": "editorTextFocus && resourceExtname == .alf"
+      }
     ]
   },
   "scripts": {

@@ -2,11 +2,6 @@ import * as vscode from 'vscode';
 import * as modifyEtag from './modify-etag';
 import * as modifyTransform from './modify-transform';
 
-// [TODO] This extension appears to break paste behavior. For instance, pastes
-// intended for other parts of the UI (find-replace fields, file renaming
-// fields) end up pasting in the text editor, even though the text cursor is
-// elsewhere. Also, multi-line paste is broken if the plugin is installed.
-
 type stringModifier = (s: string) => string;
 
 // Modify the currently selected text or the entire document if no text is selected.
@@ -99,14 +94,9 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         const clipboardText = await vscode.env.clipboard.readText();
-        const text = modifyEtag.regenerateEtags(clipboardText);
-        editor.edit(editBuilder => {
-            editBuilder.replace(editor.selection, text);
-        });
-    }));
-    
-    context.subscriptions.push(vscode.commands.registerCommand('editor.action.clipboardPasteAction', () => {
-        vscode.commands.executeCommand('extension.pasteWithNewEtags');
+        const taggedText = modifyEtag.regenerateEtags(clipboardText);
+        vscode.env.clipboard.writeText(taggedText);
+        await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
     }));
  
     context.subscriptions.push(vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
