@@ -1,7 +1,7 @@
 <Wall x="-2" z="5" y="0" w="10" d="10" h="10" />
-{{ wall(x=-2, xx=-12, z=5, zz=15, y=0, yy=7) }}
-{{ ramp(x=-2, xx=-12, z=5, zz=15, y=0, yy=4, angle=270) }}
-{{ ramp(angle=90) }}
+{{ Wall(x=-2, xx=-12, z=5, zz=15, y=0, yy=7) }}
+{{ Ramp(x=-2, xx=-12, z=5, zz=15, y=0, yy=4, angle=270) }}
+{{ Ramp(angle=90) }}
 <Incarnator angle="0" />
 <Incarnator angle="315" />
 <Incarnator angle="225" />

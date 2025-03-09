@@ -56,16 +56,16 @@ export default class Transform {
     encoder: (ExpressionEncoder | null);
     operation: transformOperation;
     simplifyExpressions: boolean;
-    filter: alf.regexFilter | null;
+    filter: string | null;
 
     constructor(
         targetAttributes: string[],
         operation: transformOperation,
         simplifyExpressions: boolean = true,
-        filter: (alf.regexFilter | null) = null
+        filter: (string | null) = null
     ) {
         if (process.env.VSCODE_DEBUG_MODE) {
-            console.log(`Transform.constructor -> targetAttributes=[${targetAttributes.join('|')}] simplifyExpressions=${simplifyExpressions} filter=${JSON.stringify(filter)}`);
+            console.log(`Transform.constructor -> targetAttributes=[${targetAttributes.join('|')}] simplifyExpressions=${simplifyExpressions} filter=${filter}`);
         }
 
         if (filter) {

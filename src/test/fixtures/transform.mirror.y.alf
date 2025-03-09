@@ -1,5 +1,5 @@
-{{ ramp(x=1, xx=2, z=3, zz=4, y=5, yy=6, angle=0) }}
-{{ ramp(x=1, xx=2, z=3, zz=4, y=5, yy=6, angle=90) }}
+{{ Ramp(x=1, xx=2, z=3, zz=4, y=5, yy=6, angle=0) }}
+{{ Ramp(x=1, xx=2, z=3, zz=4, y=5, yy=6, angle=90) }}
 <Ramp x="1" xx="2" z="3" zz="4" y="5" yy="6" angle="180" />
 <Ramp x="{{1}}" xx="{{2}}" z="{{3}}" zz="{{4}}" y="{{5}}" yy="{{6}}" angle="{{270}}" />
 <Incarnator x="0" z="0" y="10" angle="90" />

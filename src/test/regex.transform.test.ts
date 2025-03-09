@@ -2,10 +2,7 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import * as alf from '../alf-regex';
 
-const filter = {
-    xmlTag: 'Bar',
-    jinjaMacro: 'bar'
-};
+const filter = 'Bar';
 
 suite('Transform Regex Test Suite', () => {
     test('Regex for general XML tag attributes', () => {

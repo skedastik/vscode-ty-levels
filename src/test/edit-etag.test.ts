@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
-import * as mod from '../edit-etag';
+import * as edit from '../edit-etag';
 
 let randomStub: sinon.SinonStub;
 
@@ -20,7 +20,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.addEtags.expected.alf', 'utf-8');
 
-        assert.strictEqual(mod.addEtags(input), expected);
+        assert.strictEqual(edit.addEtags(input), expected);
     });
 
     test('removeEtags', () => {
@@ -29,7 +29,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.removeEtags.expected.alf', 'utf-8');
 
-        assert.strictEqual(mod.removeEtags(input), expected);
+        assert.strictEqual(edit.removeEtags(input), expected);
     });
 
     test('regenerateEtags', () => {
@@ -38,7 +38,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.regenerateEtags.expected.alf', 'utf-8');
 
-        assert.strictEqual(mod.regenerateEtags(input), expected);
+        assert.strictEqual(edit.regenerateEtags(input), expected);
     });
 
     test('toggleAutoTagComment on', () => {
@@ -47,7 +47,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.toggleAutoTagComment.on.expected.alf', 'utf-8');
 
-        assert.strictEqual(mod.toggleAutoTagComment(input), expected);
+        assert.strictEqual(edit.toggleAutoTagComment(input), expected);
     });
 
     test('toggleAutoTagComment off', () => {
@@ -56,6 +56,6 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.autotagged.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.toggleAutoTagComment.off.expected.alf', 'utf-8');
 
-        assert.strictEqual(mod.toggleAutoTagComment(input), expected);
+        assert.strictEqual(edit.toggleAutoTagComment(input), expected);
     });
 });

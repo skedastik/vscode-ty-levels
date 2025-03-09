@@ -46,23 +46,23 @@
 
 {# jinja macros ------------------------------------------------------------- #}
 
-{{ foo() }}
-{{ foo( ) }}
-{{ foo@(j=@2@) }@}
-{{ foo(fakej=2) }}
-{{ foo(jfake=2) }}
-{{ foo(i=j, k=j) }}
-{{ foo@(jj=@2@) }@}
-{{ foo@(jj=@2@@,@ j=@2@) }@}
-{{ foo@(j=@2@@,@ jj=@2@) }@}
-{{ foo@(j=@2@@, i=0) }}
-{{ foo(i=0,@ j=@2@)}@}
-{{ foo(i=0,@ j=@2@@, k=0) }}
-{{ foo(  @ j   =   @0   @) }@}
-{{foo@(j=@2@@@,jj=@4@)}@}
-{{foo@(jj=@4@@@,j=@2@)}@}
-{{ foo@(j=@2+a@) }@}
-{{ foo@(j=@2+cos(a)@) }@}
-{{ foo@(j=@2+abs(cos(a))@) }@}
-{{ foo@(j=@2+abs(math.cos(a))@) }@}
-{{foo@(j=@2+abs(math.cos(a))@@,i=2*j@,jj=@fn((fn(b)-fn(c)))@)}@}
+{{ Foo() }}
+{{ Foo( ) }}
+{{ Foo@(j=@2@) }@}
+{{ Foo(fakej=2) }}
+{{ Foo(jfake=2) }}
+{{ Foo(i=j, k=j) }}
+{{ Foo@(jj=@2@) }@}
+{{ Foo@(jj=@2@@,@ j=@2@) }@}
+{{ Foo@(j=@2@@,@ jj=@2@) }@}
+{{ Foo@(j=@2@@, i=0) }}
+{{ Foo(i=0,@ j=@2@)}@}
+{{ Foo(i=0,@ j=@2@@, k=0) }}
+{{ Foo(  @ j   =   @0   @) }@}
+{{Foo@(j=@2@@@,jj=@4@)}@}
+{{Foo@(jj=@4@@@,j=@2@)}@}
+{{ Foo@(j=@2+a@) }@}
+{{ Foo@(j=@2+cos(a)@) }@}
+{{ Foo@(j=@2+abs(cos(a))@) }@}
+{{ Foo@(j=@2+abs(math.cos(a))@) }@}
+{{Foo@(j=@2+abs(math.cos(a))@@,i=2*j@,jj=@fn((fn(b)-fn(c)))@)}@}

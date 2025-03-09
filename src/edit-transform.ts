@@ -45,7 +45,7 @@ const zMultiply = new Transform(zAttributes, multiplicationOperation);
 const yMultiply = new Transform(yAttributes, multiplicationOperation);
 const angleMirrorZ = new Transform(angleAttributes, angleMirrorZOperation, false);
 const angleMirrorX = new Transform(angleAttributes, angleMirrorXOperation, false);
-const angleMirrorYRamps = new Transform(angleAttributes, angleMirrorYRampOperation, false, { xmlTag: 'Ramp', jinjaMacro: 'ramp' });
+const angleMirrorYRamps = new Transform(angleAttributes, angleMirrorYRampOperation, false, 'Ramp');
 
 export const translateX = (text: string, transformExpr: string) => xAdd.apply(text, transformExpr);
 export const translateZ = (text: string, transformExpr: string) => zAdd.apply(text, transformExpr);
