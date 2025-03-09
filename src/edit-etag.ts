@@ -4,6 +4,8 @@ const AUTOTAG_STRING = 'autotag';
 const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
 export const AUTOTAG_REGEX = new RegExp(`^\\s*<!--\\s+${AUTOTAG_STRING}\\s+-->`);
 
+export const isAutotagEnabled = (documentText: string) => AUTOTAG_REGEX.test(documentText);
+
 const generateEtag = () => {
     const chars = [];
     for (let i = 0; i < ETAG_LENGTH; i++) {

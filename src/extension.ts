@@ -93,9 +93,17 @@ export function activate(context: vscode.ExtensionContext) {
         if (!editor) {
             return;
         }
-        const clipboardText = await vscode.env.clipboard.readText();
-        const taggedText = editEtag.regenerateEtags(clipboardText);
-        vscode.env.clipboard.writeText(taggedText);
+        const document = editor.document;
+        const autotagEnabled = editEtag.isAutotagEnabled(document.getText());
+        if (autotagEnabled) {
+            const clipboardText = await vscode.env.clipboard.readText();
+            let taggedText = editEtag.regenerateEtags(clipboardText);
+            taggedText = editEtag.addEtags(taggedText);
+            await vscode.env.clipboard.writeText(taggedText);
+            await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+            await vscode.env.clipboard.writeText(clipboardText);
+            return;
+        }
         await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
     }));
  
@@ -105,9 +113,8 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         const document = editor.document;
-        const firstLine = document.lineAt(0).text;
-        if (editEtag.AUTOTAG_REGEX.test(firstLine)) {
-            const text = document.getText();
+        const text = document.getText();
+        if (editEtag.isAutotagEnabled(text)) {
             const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), editEtag.addEtags(text));
             event.waitUntil(Promise.resolve([textEdit]));   
         }
