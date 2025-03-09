@@ -1,0 +1,7 @@
+<Ramp foo="0" />
+<Ramp foo="0" />
+<Ramp bar="moo" />
+
+<Wall foo="bar" />
+<Wall foo="2" />
+<Wall bar="meow" />

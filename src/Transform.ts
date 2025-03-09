@@ -53,16 +53,16 @@ type transformOperation = (currentExpr: string, transformExpr: string) => string
 export default class Transform {
     regexTag: RegExp;
     regexMacro: RegExp;
-    encoder: (ExpressionEncoder | null);
+    encoder?: ExpressionEncoder;
     operation: transformOperation;
     simplifyExpressions: boolean;
-    filter: string | null;
+    filter?: string;
 
     constructor(
         targetAttributes: string[],
         operation: transformOperation,
         simplifyExpressions: boolean = true,
-        filter: (string | null) = null
+        filter?: string
     ) {
         if (process.env.VSCODE_DEBUG_MODE) {
             console.log(`Transform.constructor -> targetAttributes=[${targetAttributes.join('|')}] simplifyExpressions=${simplifyExpressions} filter=${filter}`);
@@ -86,7 +86,6 @@ export default class Transform {
         
         this.operation = operation;
         this.simplifyExpressions = simplifyExpressions;
-        this.encoder = null;
         this.filter = filter;
 
         if (process.env.VSCODE_DEBUG_MODE) {

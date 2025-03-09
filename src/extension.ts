@@ -4,6 +4,8 @@ import * as editTransform from './edit-transform';
 
 type stringEdit = (s: string) => string;
 
+class UserError extends Error {}
+
 // Edit the currently selected text or the entire document if no text is selected.
 const editSelection = (edit: stringEdit) => {
     const editor = vscode.window.activeTextEditor;
@@ -26,30 +28,46 @@ const editSelection = (edit: stringEdit) => {
     });
 };
 
-let lastTransformExpr: string = '0';
-const TRANSLATE_PROMPT = 'Enter translation expression (e.g. \'-2\')';
+let lastInputValue: string = '0';
+const TRANSLATE_PROMPT = 'Enter translation expression. Example: "-2" or "2 * myVar"';
+const SET_PROMPT = 'Enter: {<param>,<value>,<element(optional)>}. Examples: "w,5" or "shape,bspGrenade,Goody"';
 
-type transformEdit = (transformExpr: string, text: string) => string;
+type transformEdit = (transformExpr: string, text: string, ...args: string[]) => string;
+type argSplitter = (argString: string) => string[];
 
 // Transform (translate/mirror etc.) elements
-const transformSelection = async (edit: transformEdit, prompt: string | null = null) => {
-    let expr = '';
-    if (prompt) {
-        const input = await vscode.window.showInputBox({
-            prompt,
-            value: lastTransformExpr
-        });
-        if (!input) {
+const transformSelection = async (edit: transformEdit, prompt?: string, splitter?: argSplitter) => {
+    try {
+        let expr = '';
+        let args: string[] = [];
+        if (prompt) {
+            const input = await vscode.window.showInputBox({
+                prompt,
+                value: lastInputValue
+            });
+            if (!input) {
+                return;
+            }
+            expr = input;
+            if (splitter) {
+                args = splitter(input);
+                expr = args[0];
+                args = args.slice(1);
+            }
+        }
+        editSelection((text) => edit(text, expr, ...args));
+        lastInputValue = expr;
+    }
+    catch (error) {
+        if (error instanceof UserError) {
+            vscode.window.showInformationMessage(error.message);
             return;
         }
-        expr = input;
-    }
-    try {
-        editSelection((text) => edit(text, expr));
-        lastTransformExpr = expr;
-    }
-    catch {
-        vscode.window.showInformationMessage('Invalid expression.');
+        if (error instanceof Error) {
+            console.log(error.stack);
+        }
+        vscode.window.showInformationMessage('Internal error.');
+        throw error;
     }
 };
 
@@ -140,31 +158,46 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => transformSelection(
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', () => transformSelection(
         editTransform.translateX,
         TRANSLATE_PROMPT
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', async () => transformSelection(
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', () => transformSelection(
         editTransform.translateZ,
         TRANSLATE_PROMPT
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', async () => transformSelection(
+    context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', () => transformSelection(
         editTransform.translateY,
         TRANSLATE_PROMPT
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', async () => transformSelection(
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', () => transformSelection(
         editTransform.mirrorX
     )));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', async () => transformSelection(
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', () => transformSelection(
         editTransform.mirrorZ
     )));
     
-    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', async () => transformSelection(
+    context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', () => transformSelection(
         editTransform.mirrorY
+    )));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.setParam', () => transformSelection(
+        (text: string, valueExpr: string, ...args: string[]) => editTransform.set(text, valueExpr, args[0], args[1]),
+        SET_PROMPT,
+        (argString) => {
+            let args = argString.split(',');
+            if (args.length < 2) {
+                throw new UserError('Invalid input. Expected at least two comma-separated arguments.');
+            }
+            let param = args[0];
+            args[0] = args[1];
+            args[1] = param;
+            return args;
+        }
     )));
 }
 

@@ -8,7 +8,7 @@ Hit `Cmd-Shift-P` and begin typing any of the commands below. Hit `Enter` to exe
 
 ### Transforming geometry and actor elements
 
-Physically transform geometry and actors en masse by selecting the elements you want to transform and executing any of the following commands.
+Physically transform geometry and actors en masse by selecting the elements you want to transform and executing any of the following commands. The entire document will be affected if no selection is made.
 
 #### Translation
 
@@ -41,6 +41,20 @@ Multiply **cx/x/xx** attributes by -1. Reflect **angle** attributes across the Z
 ##### `Mirror Elements Across Y Axis`
 
 Multiply **y/yy** attributes by -1. Reflect ramp **angle** attributes across the Y axis. The **angle** attribute for elements other than ramps are unaffected.
+
+#### More commands
+
+##### `Set Param`
+
+Set a specific param/attribute to a given value. You will be prompted to enter arguments matching this format: `{<param>,<value>,<element (optional)>}`. Examples:
+
+    w,5
+    
+        Set all `w` params/attributes to `5`.
+
+    shape,bspGrenade,Goody
+
+        Set `shape` params/attributes to `bspGrenade` on all `Goody` elements.
 
 ### Tagging
 

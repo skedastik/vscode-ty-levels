@@ -65,6 +65,10 @@
       {
         "command": "extension.mirrorY",
         "title": "Mirror Elements Across Y Axis"
+      },
+      {
+        "command": "extension.setParam",
+        "title": "Set Param"
       }
     ],
     "keybindings": [

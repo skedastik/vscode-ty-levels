@@ -62,4 +62,16 @@ suite('Transform Edit Test Suite', () => {
         const expected = fs.readFileSync('src/test/fixtures/transform.mirror.y.expected.alf', 'utf-8');
         assert.strictEqual(edit.mirrorY(input), expected);
     });
+
+    test('set without a filter', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.set.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.set.general.expected.alf', 'utf-8');
+        assert.strictEqual(edit.set(input, '0', 'foo'), expected);
+    });
+
+    test('set with a filter', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.set.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.set.specific.expected.alf', 'utf-8');
+        assert.strictEqual(edit.set(input, '0', 'foo', 'Ramp'), expected);
+    });
 });

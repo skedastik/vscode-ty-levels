@@ -5,14 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.0.9] - 2025.03.09
+
+### Added
+
+- `Set Param` command
 
 ### Changed
 
 - `Paste with New Etags` command
     - Add etags to untagged elements in pasted text in addition to regenerating existing tags.
     - Only add/regenerate etags in pasted text if autotag is enabled.
-    - Avoid permanently altering clipboard content
+    - Avoid permanently altering clipboard content.
 
 ## [0.0.8] - 2025.03.07
 
@@ -25,7 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Reimplement paste logic to avoid overriding built-in paste action.
+- `Paste with New Etags` command
+    - Reimplement paste logic to avoid overriding built-in paste action.
 
 ## [0.0.7] - 2025.03.06
 
