@@ -31,8 +31,8 @@
         "title": "Regenerate Etags"
       },
       {
-        "command": "extension.pasteWithNewEtags",
-        "title": "Paste with New Etags"
+        "command": "extension.pasteWithEtags",
+        "title": "Paste with Etags"
       },
       {
         "command": "extension.toggleAutoTag",
@@ -73,7 +73,7 @@
     ],
     "keybindings": [
       {
-        "command": "extension.pasteWithNewEtags",
+        "command": "extension.pasteWithEtags",
         "key": "ctrl+v",
         "mac": "cmd+v",
         "when": "editorTextFocus && resourceExtname == .alf"

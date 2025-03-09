@@ -106,7 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.pasteWithNewEtags', async () => {
+    context.subscriptions.push(vscode.commands.registerCommand('extension.pasteWithEtags', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return;
