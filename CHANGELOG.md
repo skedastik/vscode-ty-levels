@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Paste with New Etags` command
+    - Rename to `Paste with Etags`.
     - Add etags to untagged elements in pasted text in addition to regenerating existing tags.
     - Only add/regenerate etags in pasted text if autotag is enabled.
     - Avoid permanently altering clipboard content.

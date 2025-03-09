@@ -62,6 +62,10 @@ Set a specific param/attribute to a given value. You will be prompted to enter a
 
 Enable or disable automatic etag creation on save. This adds an "autotag" comment to the top of your file when enabled.
 
+#### `Paste with Etags`
+
+Paste from clipboard, adding etags where they didn't exist before and regenerating existing etags in the pasted clip. There is no need to invoke this command manually. It happens automatically when **[Auto Tag](#toggle-auto-tag)** is enabled and you paste using `Cmd-V`.
+
 #### Manual tagging
 
 ##### `Add Etags`
@@ -75,10 +79,6 @@ Remove etags from selection or entire document.
 ##### `Regenerate Etags`
 
 Regenerate existing etags across selection or entire document.
-
-##### `Paste with New Etags`
-
-Paste from clipboard, automatically regenerating existing etags.
 
 #### External commands
 
