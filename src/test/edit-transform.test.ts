@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
-import * as mod from '../modify-transform';
+import * as mod from '../edit-transform';
 
-suite('Modifiers Test Suite', () => {
+suite('Transform Edit Test Suite', () => {
     test('translateX + 1', () => {
         const expr = '1';
         const input = fs.readFileSync('src/test/fixtures/transform.translate.alf', 'utf-8');

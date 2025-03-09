@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import * as modifyEtag from './modify-etag';
-import * as modifyTransform from './modify-transform';
+import * as editEtag from './edit-etag';
+import * as editTransform from './edit-transform';
 
-type stringModifier = (s: string) => string;
+type stringEdit = (s: string) => string;
 
-// Modify the currently selected text or the entire document if no text is selected.
-const modifySelection = (modifier: stringModifier) => {
+// Edit the currently selected text or the entire document if no text is selected.
+const editSelection = (edit: stringEdit) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         return;
@@ -22,17 +22,17 @@ const modifySelection = (modifier: stringModifier) => {
         text = document.getText(selection);
     }
     editor.edit(editBuilder => {
-        editBuilder.replace(range, modifier(text));
+        editBuilder.replace(range, edit(text));
     });
 };
 
 let lastTransformExpr: string = '0';
 const TRANSLATE_PROMPT = 'Enter translation expression (e.g. \'-2\')';
 
-type transformModifier = (transformExpr: string, text: string) => string;
+type transformEdit = (transformExpr: string, text: string) => string;
 
 // Transform (translate/mirror etc.) elements
-const transformSelection = async (modifier: transformModifier, prompt: string | null = null) => {
+const transformSelection = async (edit: transformEdit, prompt: string | null = null) => {
     let expr = '';
     if (prompt) {
         const input = await vscode.window.showInputBox({
@@ -45,7 +45,7 @@ const transformSelection = async (modifier: transformModifier, prompt: string | 
         expr = input;
     }
     try {
-        modifySelection((text) => modifier(text, expr));
+        editSelection((text) => edit(text, expr));
         lastTransformExpr = expr;
     }
     catch {
@@ -54,9 +54,9 @@ const transformSelection = async (modifier: transformModifier, prompt: string | 
 };
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => modifySelection(modifyEtag.addEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => modifySelection(modifyEtag.removeEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => modifySelection(modifyEtag.regenerateEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection(editEtag.addEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection(editEtag.removeEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection(editEtag.regenerateEtags)));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
         const editor = vscode.window.activeTextEditor;
@@ -94,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         const clipboardText = await vscode.env.clipboard.readText();
-        const taggedText = modifyEtag.regenerateEtags(clipboardText);
+        const taggedText = editEtag.regenerateEtags(clipboardText);
         vscode.env.clipboard.writeText(taggedText);
         await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
     }));
@@ -106,9 +106,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const document = editor.document;
         const firstLine = document.lineAt(0).text;
-        if (modifyEtag.AUTOTAG_REGEX.test(firstLine)) {
+        if (editEtag.AUTOTAG_REGEX.test(firstLine)) {
             const text = document.getText();
-            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), modifyEtag.addEtags(text));
+            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), editEtag.addEtags(text));
             event.waitUntil(Promise.resolve([textEdit]));   
         }
     }));
@@ -121,9 +121,9 @@ export function activate(context: vscode.ExtensionContext) {
         const document = editor.document;
         const range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
         let text = document.getText();
-        text = modifyEtag.toggleAutoTagComment(text);
-        if (modifyEtag.AUTOTAG_REGEX.test(text)) {
-            text = modifyEtag.addEtags(text);
+        text = editEtag.toggleAutoTagComment(text);
+        if (editEtag.AUTOTAG_REGEX.test(text)) {
+            text = editEtag.addEtags(text);
             vscode.window.showInformationMessage('Autotag enabled.');
         } else {
             vscode.window.showInformationMessage('Autotag disabled.');
@@ -134,30 +134,30 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', async () => transformSelection(
-        modifyTransform.translateX,
+        editTransform.translateX,
         TRANSLATE_PROMPT
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', async () => transformSelection(
-        modifyTransform.translateZ,
+        editTransform.translateZ,
         TRANSLATE_PROMPT
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', async () => transformSelection(
-        modifyTransform.translateY,
+        editTransform.translateY,
         TRANSLATE_PROMPT
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', async () => transformSelection(
-        modifyTransform.mirrorX
+        editTransform.mirrorX
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', async () => transformSelection(
-        modifyTransform.mirrorZ
+        editTransform.mirrorZ
     )));
     
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', async () => transformSelection(
-        modifyTransform.mirrorY
+        editTransform.mirrorY
     )));
 }
 

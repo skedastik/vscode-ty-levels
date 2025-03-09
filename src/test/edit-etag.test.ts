@@ -1,11 +1,11 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
-import * as mod from '../modify-etag';
+import * as mod from '../edit-etag';
 
 let randomStub: sinon.SinonStub;
 
-suite('Modifiers Test Suite', () => {
+suite('Etag Edit Test Suite', () => {
     setup(function () {
         randomStub = sinon.stub(Math, 'random');
     });
