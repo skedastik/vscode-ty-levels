@@ -61,5 +61,5 @@
 
 {{ Wall(etag=expression) }}
 
-{{ irrelevantMacro() }}
-{{ irrelevantMacro() }}
+{{ NotASolid() }}
+{{ NotASolid() }}

@@ -61,5 +61,5 @@
 
 {{ Wall(etag=expression) }}
 
-{{ irrelevantMacro() }}
-{{ irrelevantMacro(etag='0000000') }}
+{{ NotASolid() }}
+{{ NotASolid(etag='0000000') }}

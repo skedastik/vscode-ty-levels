@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
-import * as edit from '../edit-etag';
+import EtagEdit from '../EtagEdit';
 
 let randomStub: sinon.SinonStub;
 
@@ -20,6 +20,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.addEtags.expected.alf', 'utf-8');
 
+        const edit = new EtagEdit();
         assert.strictEqual(edit.addEtags(input), expected);
     });
 
@@ -29,6 +30,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.removeEtags.expected.alf', 'utf-8');
 
+        const edit = new EtagEdit();
         assert.strictEqual(edit.removeEtags(input), expected);
     });
 
@@ -38,6 +40,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.regenerateEtags.expected.alf', 'utf-8');
 
+        const edit = new EtagEdit();
         assert.strictEqual(edit.regenerateEtags(input), expected);
     });
 
@@ -47,6 +50,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.toggleAutoTagComment.on.expected.alf', 'utf-8');
 
+        const edit = new EtagEdit();
         assert.strictEqual(edit.toggleAutoTagComment(input), expected);
     });
 
@@ -56,6 +60,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.autotagged.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.toggleAutoTagComment.off.expected.alf', 'utf-8');
 
+        const edit = new EtagEdit();
         assert.strictEqual(edit.toggleAutoTagComment(input), expected);
     });
 });
