@@ -1,6 +1,6 @@
 {
-    "_commentAlsoTag": "These actors will be tagged by autotag. This list was manually constructed from objects.json in Avara's source code, with the addition of `Wall`.",
-    "alsoTag": [
+    "_comment_autotag": "These actors will be tagged by autotag. This list was manually constructed from objects.json in Avara's source code, with the addition of `Wall`.",
+    "autotag": [
         "Wall",
 
         "Sphere",

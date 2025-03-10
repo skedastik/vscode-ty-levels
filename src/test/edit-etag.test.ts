@@ -56,7 +56,7 @@ suite('Etag Edit Test Suite', () => {
         const input = fs.readFileSync('src/test/fixtures/etags.addEtags.with.config.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/etags.addEtags.with.config.expected.alf', 'utf-8');
         const edit = new EtagEdit({
-            "alsoTag": ["Bar", "NotASolid"]
+            "autotag": ["Bar", "NotASolid"]
         });
         assert.strictEqual(edit.addEtags(input), expected);
     });

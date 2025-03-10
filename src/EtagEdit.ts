@@ -6,15 +6,20 @@ const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
 import { tylConfig } from './config';
 
 export default class EtagEdit {
-    #alsoTag: { [key: string]: boolean };
+    #autotagIdentifiers: Set<string>;
 
     constructor(config?: tylConfig) {
-        this.#alsoTag = {};
+        this.#autotagIdentifiers = new Set();
+        this.configure(config);
+    }
+
+    configure(config?: tylConfig) {
         if (!config) {
             return;
         }
-        for (let i = 0; config.alsoTag && i < config.alsoTag.length; i++) {
-            this.#alsoTag[config.alsoTag[i]] = true;
+        this.#autotagIdentifiers.clear();
+        for (let i = 0; config.autotag && i < config.autotag.length; i++) {
+            this.#autotagIdentifiers.add(config.autotag[i]);
         }
     }
 
@@ -44,7 +49,7 @@ export default class EtagEdit {
     ) => {
         const offset = closingDelimiter.length;
 
-        if (!this.#alsoTag[identifier]) {
+        if (!this.#autotagIdentifiers.has(identifier)) {
             return match;
         }
 
