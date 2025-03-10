@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
-import * as editEtag from './edit-etag';
+import EtagEdit from './EtagEdit';
 import * as editTransform from './edit-transform';
 
 type stringEdit = (s: string) => string;
 
 class UserError extends Error {}
+
+const etagEdit = new EtagEdit();
 
 // Edit the currently selected text or the entire document if no text is selected.
 const editSelection = (edit: stringEdit) => {
@@ -72,9 +74,9 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
 };
 
 export function activate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection(editEtag.addEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection(editEtag.removeEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection(editEtag.regenerateEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection(etagEdit.addEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection(etagEdit.removeEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection(etagEdit.regenerateEtags)));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
         const editor = vscode.window.activeTextEditor;
@@ -112,11 +114,11 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         const document = editor.document;
-        const autotagEnabled = editEtag.isAutotagEnabled(document.getText());
+        const autotagEnabled = EtagEdit.isAutotagEnabled(document.getText());
         if (autotagEnabled) {
             const clipboardText = await vscode.env.clipboard.readText();
-            let taggedText = editEtag.regenerateEtags(clipboardText);
-            taggedText = editEtag.addEtags(taggedText);
+            let taggedText = etagEdit.regenerateEtags(clipboardText);
+            taggedText = etagEdit.addEtags(taggedText);
             await vscode.env.clipboard.writeText(taggedText);
             await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
             await vscode.env.clipboard.writeText(clipboardText);
@@ -132,8 +134,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const document = editor.document;
         const text = document.getText();
-        if (editEtag.isAutotagEnabled(text)) {
-            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), editEtag.addEtags(text));
+        if (EtagEdit.isAutotagEnabled(text)) {
+            const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), etagEdit.addEtags(text));
             event.waitUntil(Promise.resolve([textEdit]));   
         }
     }));
@@ -146,9 +148,9 @@ export function activate(context: vscode.ExtensionContext) {
         const document = editor.document;
         const range = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
         let text = document.getText();
-        text = editEtag.toggleAutoTagComment(text);
-        if (editEtag.AUTOTAG_REGEX.test(text)) {
-            text = editEtag.addEtags(text);
+        text = etagEdit.toggleAutoTagComment(text);
+        if (EtagEdit.isAutotagEnabled(text)) {
+            text = etagEdit.addEtags(text);
             vscode.window.showInformationMessage('Autotag enabled.');
         } else {
             vscode.window.showInformationMessage('Autotag disabled.');
