@@ -10,10 +10,6 @@ export default class EtagEdit {
 
     constructor(config?: tylConfig) {
         this.#alsoTag = {};
-        this.configure(config);
-    }
-
-    private configure(config?: tylConfig) {
         if (!config) {
             return;
         }

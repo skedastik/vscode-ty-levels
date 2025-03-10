@@ -1,13 +1,10 @@
 import * as vscode from 'vscode';
 import EtagEdit from './EtagEdit';
 import * as editTransform from './edit-transform';
+import { loadConfig } from './config';
+import { UserError } from './error';
 
 type stringEdit = (s: string) => string;
-
-class UserError extends Error {}
-
-const ETAG_CONFIG_DEFAULT = require('./tylconfig.json');
-const etagEdit = new EtagEdit(ETAG_CONFIG_DEFAULT);
 
 // Edit the currently selected text or the entire document if no text is selected.
 const editSelection = (edit: stringEdit) => {
@@ -75,6 +72,10 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
 };
 
 export function activate(context: vscode.ExtensionContext) {
+    const config = loadConfig();
+
+    const etagEdit = new EtagEdit(config);
+
     context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection(etagEdit.addEtags)));
     context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection(etagEdit.removeEtags)));
     context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection(etagEdit.regenerateEtags)));

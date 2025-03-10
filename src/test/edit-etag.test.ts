@@ -5,7 +5,7 @@ import EtagEdit from '../EtagEdit';
 
 let randomStub: sinon.SinonStub;
 
-import * as testConfig from '../tylconfig.json';
+import { default as testConfig } from '../tylconfig.json';
 
 suite('Etag Edit Test Suite', () => {
     setup(function () {
