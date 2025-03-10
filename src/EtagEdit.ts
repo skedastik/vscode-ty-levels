@@ -3,7 +3,27 @@ const ETAG_LENGTH = 7;
 const AUTOTAG_STRING = 'autotag';
 const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
 
-export default class EtagEdit {
+export type EtagEditConfig = {
+    alsoTag?: string[]
+}
+
+export class EtagEdit {
+    #alsoTag: { [key: string]: boolean };
+
+    constructor(config?: EtagEditConfig) {
+        this.#alsoTag = {};
+        this.configure(config);
+    }
+
+    private configure(config?: EtagEditConfig) {
+        if (!config) {
+            return;
+        }
+        for (let i = 0; config.alsoTag && i < config.alsoTag.length; i++) {
+            this.#alsoTag[config.alsoTag[i]] = true;
+        }
+    }
+
     private static AUTOTAG_REGEX = new RegExp(`^\\s*<!--\\s+${AUTOTAG_STRING}\\s+-->`);
 
     static isAutotagEnabled(documentText: string) {
@@ -21,7 +41,8 @@ export default class EtagEdit {
 
     private addEtagsReplacer = (
         quoteChar: string,
-        padString: string,
+        prePad: string,
+        postPad: string,
         match: string,
         identifier: string,
         precedingParams: string,
@@ -29,15 +50,20 @@ export default class EtagEdit {
     ) => {
         const offset = closingDelimiter.length;
 
+        if (!this.#alsoTag[identifier]) {
+            return match;
+        }
+
         if (!/[\s\(]etag\s*=/.test(match)) {
             return [
                 match.substring(0, match.length - offset),
-                precedingParams.length > 0 ? padString : '',
+                precedingParams.length > 0 ? prePad : '',
                 'etag=',
                 quoteChar,
                 EtagEdit.generateEtag(),
                 quoteChar,
-                match.substring(match.length - offset, match.length)
+                postPad,
+                closingDelimiter
             ].join('');
         }
 
@@ -48,16 +74,17 @@ export default class EtagEdit {
         return text
             .replace(
                 // XML elements
-                /<(Wall[^DS]|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\s*(.*?)(\s*\/>)/sg,
+                /<([a-zA-Z_][a-zA-Z0-9_\.]*)\s+(.*?)(\s*\/>)/sg,
                 (match: string, identifier: string, precedingParams: string, closingDelimiter: string) => {
-                    return this.addEtagsReplacer('"', ' ', match, identifier, precedingParams, closingDelimiter);
+                    const postPad = closingDelimiter === '/>' ? ' ' : '';
+                    return this.addEtagsReplacer('"', ' ', postPad, match, identifier, precedingParams, closingDelimiter);
                 }
             )
             .replace(
                 // Jinja macros
-                /\{\{\s*(Wall|WallDoor|Ramp|Solid|WallSolid|FreeSolid)\(\s*(.*?)(\s*\)\s*\}\})/g,
+                /\{\{\s*([a-zA-Z_][a-zA-Z0-9_\.]*)\(\s*(.*?)(\s*\)\s*\}\})/g,
                 (match: string, identifier: string, precedingParams: string, closingDelimiter: string) => {
-                    return this.addEtagsReplacer("'", ', ', match, identifier, precedingParams, closingDelimiter);
+                    return this.addEtagsReplacer("'", ', ', '', match, identifier, precedingParams, closingDelimiter);
                 }
             );
     }

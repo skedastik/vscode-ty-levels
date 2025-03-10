@@ -1,0 +1,9 @@
+<Foo />
+<Bar etag="0000000" />
+<NotASolid etag="0000000" />
+<NotASolid etag="existingTag" />
+
+{{ Foo() }}
+{{ Bar(etag='0000000') }}
+{{ NotASolid(etag='0000000') }}
+{{ NotASolid(etag='existingTag') }}

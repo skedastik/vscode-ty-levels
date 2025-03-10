@@ -1,9 +1,9 @@
-<Wall etag="0000000"/>
-<Ramp etag="0000000"/>
-<WallDoor etag="0000000"/>
-<WallSolid etag="0000000"/>
-<FreeSolid etag="0000000"/>
-<Solid etag="0000000"/>
+<Wall etag="0000000" />
+<Ramp etag="0000000" />
+<WallDoor etag="0000000" />
+<WallSolid etag="0000000" />
+<FreeSolid etag="0000000" />
+<Solid etag="0000000" />
 
 <Wall foo="bar" etag="0000000" />
 <Wall etag="existingTag" />

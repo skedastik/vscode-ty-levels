@@ -1,0 +1,10 @@
+{
+    "alsoTag": [
+        "Wall",
+        "WallDoor",
+        "Ramp",
+        "Solid",
+        "WallSolid",
+        "FreeSolid"
+    ]
+}

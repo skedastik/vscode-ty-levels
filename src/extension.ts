@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
-import EtagEdit from './EtagEdit';
+import {EtagEdit, EtagEditConfig} from './EtagEdit';
 import * as editTransform from './edit-transform';
 
 type stringEdit = (s: string) => string;
 
 class UserError extends Error {}
 
-const etagEdit = new EtagEdit();
+const ETAG_CONFIG_DEFAULT = require('./tylconfig.json');
+const etagEdit = new EtagEdit(ETAG_CONFIG_DEFAULT);
 
 // Edit the currently selected text or the entire document if no text is selected.
 const editSelection = (edit: stringEdit) => {
