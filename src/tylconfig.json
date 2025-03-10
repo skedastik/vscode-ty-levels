@@ -1,10 +1,24 @@
 {
+    "_commentAlsoTag": "These actors will be tagged by autotag. This list was manually constructed from objects.json in Avara's source code, with the addition of `Wall`.",
     "alsoTag": [
         "Wall",
-        "WallDoor",
-        "Ramp",
+
+        "Sphere",
         "Solid",
         "WallSolid",
-        "FreeSolid"
+        "FreeSolid",
+        "Dome",
+        "Ramp",
+        "TriPyramid",
+        "Door",
+        "Door2",
+        "WallDoor",
+        "Switch",
+        "Guard",
+        "Pill",
+        "Ball",
+        "Mine",
+        "Parasite",
+        "Ufo"
     ]
 }
