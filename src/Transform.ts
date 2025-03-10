@@ -16,9 +16,9 @@ class ExpressionEncoder {
         this.symbolsToTokens = {};
     }
 
-    // Encode certain tokens in expression that mathjs parse incorrectly. This
-    // includes function tokens (which are evaluated by design in mathjs), and
-    // hex color values like "#ffffff".
+    // Encode certain tokens that conflict with mathjs' parser. This includes
+    // function tokens (which are evaluated by design in mathjs), and hex color
+    // values like "#ffffff".
     encode(expr: string) {
         return expr.replace(ExpressionEncoder.CONFLICTING_TOKEN_REGEX, (token: string) => {
             // Use a hash so that identical strings map to the same symbol. This
