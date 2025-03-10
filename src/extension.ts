@@ -1,12 +1,11 @@
 import * as vscode from 'vscode';
 import EtagEdit from './EtagEdit';
 import * as editTransform from './edit-transform';
+import { ConfigAutoLoader, tylConfig } from './config';
+import { UserError } from './error';
+import { debounce } from './util';
 
 type stringEdit = (s: string) => string;
-
-class UserError extends Error {}
-
-const etagEdit = new EtagEdit();
 
 // Edit the currently selected text or the entire document if no text is selected.
 const editSelection = (edit: stringEdit) => {
@@ -62,18 +61,20 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
     }
     catch (error) {
         if (error instanceof UserError) {
-            vscode.window.showInformationMessage(error.message);
+            vscode.window.showErrorMessage(error.message);
             return;
         }
         if (error instanceof Error) {
             console.log(error.stack);
         }
-        vscode.window.showInformationMessage('Internal error.');
+        vscode.window.showErrorMessage('Internal error.');
         throw error;
     }
 };
 
 export function activate(context: vscode.ExtensionContext) {
+    const etagEdit = new EtagEdit();
+
     context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection(etagEdit.addEtags)));
     context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection(etagEdit.removeEtags)));
     context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection(etagEdit.regenerateEtags)));
@@ -96,7 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
             editor.selection = new vscode.Selection(start, end);
             editor.revealRange(new vscode.Range(start, end));
         } else {
-            vscode.window.showInformationMessage('Etag not found.');
+            vscode.window.showErrorMessage('Etag not found.');
         }
     }));
 
@@ -201,6 +202,15 @@ export function activate(context: vscode.ExtensionContext) {
             return args;
         }
     )));
+
+    const configAutoLoader = new ConfigAutoLoader(
+        context,
+        // debounce to avoid reading the config file too often
+        debounce(async (config: tylConfig) => {
+            etagEdit.configure(config);
+        }, 500)
+    );
+    configAutoLoader.start();
 }
 
 export function deactivate() {}

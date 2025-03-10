@@ -1,10 +1,22 @@
 <!-- autotag -->
 <Wall />
-<Ramp />
-<WallDoor />
+<Sphere />
+<Solid />
 <WallSolid />
 <FreeSolid />
-<Solid />
+<Dome />
+<Ramp />
+<TriPyramid />
+<Door />
+<Door2 />
+<WallDoor />
+<Switch />
+<Guard />
+<Pill />
+<Ball />
+<Mine />
+<Parasite />
+<Ufo />
 
 <Wall foo="bar" />
 <Wall etag="existingTag" />
@@ -48,11 +60,23 @@
 <Wall fakeetag="fakeExistingTag" />
 
 {{ Wall() }}
-{{ Ramp() }}
-{{ WallDoor() }}
+{{ Sphere() }}
+{{ Solid() }}
 {{ WallSolid() }}
 {{ FreeSolid() }}
-{{ Solid() }}
+{{ Dome() }}
+{{ Ramp() }}
+{{ TriPyramid() }}
+{{ Door() }}
+{{ Door2() }}
+{{ WallDoor() }}
+{{ Switch() }}
+{{ Guard() }}
+{{ Pill() }}
+{{ Ball() }}
+{{ Mine() }}
+{{ Parasite() }}
+{{ Ufo() }}
 
 {{ Wall(foo='bar') }}
 {{ Wall(etag='existingTag') }}

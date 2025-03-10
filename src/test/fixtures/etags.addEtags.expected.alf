@@ -1,9 +1,21 @@
-<Wall etag="0000000"/>
-<Ramp etag="0000000"/>
-<WallDoor etag="0000000"/>
-<WallSolid etag="0000000"/>
-<FreeSolid etag="0000000"/>
-<Solid etag="0000000"/>
+<Wall etag="0000000" />
+<Sphere etag="0000000" />
+<Solid etag="0000000" />
+<WallSolid etag="0000000" />
+<FreeSolid etag="0000000" />
+<Dome etag="0000000" />
+<Ramp etag="0000000" />
+<TriPyramid etag="0000000" />
+<Door etag="0000000" />
+<Door2 etag="0000000" />
+<WallDoor etag="0000000" />
+<Switch etag="0000000" />
+<Guard etag="0000000" />
+<Pill etag="0000000" />
+<Ball etag="0000000" />
+<Mine etag="0000000" />
+<Parasite etag="0000000" />
+<Ufo etag="0000000" />
 
 <Wall foo="bar" etag="0000000" />
 <Wall etag="existingTag" />
@@ -47,11 +59,23 @@
 <Wall fakeetag="fakeExistingTag" etag="0000000" />
 
 {{ Wall(etag='0000000') }}
-{{ Ramp(etag='0000000') }}
-{{ WallDoor(etag='0000000') }}
+{{ Sphere(etag='0000000') }}
+{{ Solid(etag='0000000') }}
 {{ WallSolid(etag='0000000') }}
 {{ FreeSolid(etag='0000000') }}
-{{ Solid(etag='0000000') }}
+{{ Dome(etag='0000000') }}
+{{ Ramp(etag='0000000') }}
+{{ TriPyramid(etag='0000000') }}
+{{ Door(etag='0000000') }}
+{{ Door2(etag='0000000') }}
+{{ WallDoor(etag='0000000') }}
+{{ Switch(etag='0000000') }}
+{{ Guard(etag='0000000') }}
+{{ Pill(etag='0000000') }}
+{{ Ball(etag='0000000') }}
+{{ Mine(etag='0000000') }}
+{{ Parasite(etag='0000000') }}
+{{ Ufo(etag='0000000') }}
 
 {{ Wall(foo='bar', etag='0000000') }}
 {{ Wall(etag='existingTag') }}

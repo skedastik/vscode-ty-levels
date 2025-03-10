@@ -62,6 +62,8 @@ Set a specific param/attribute to a given value. You will be prompted to enter a
 
 Enable or disable automatic etag creation on save. This adds an "autotag" comment to the top of your file when enabled.
 
+By default, only Avara's built-in solids are affected (Wall, Ramp, WallDoor, etc.). This behavior can be [configured](#configuration).
+
 #### `Paste with Etags`
 
 Paste from clipboard, adding etags where they didn't exist before and regenerating existing etags in the pasted clip. There is no need to invoke this command manually. It happens automatically when **[Auto Tag](#toggle-auto-tag)** is enabled and you paste using `Cmd-V`.
@@ -70,7 +72,7 @@ Paste from clipboard, adding etags where they didn't exist before and regenerati
 
 ##### `Add Etags`
 
-Add etags to selected solids (Walls, Ramps, WallDoors etc.). Existing etags are unchanged. The entire document is affected if nothing is selected.
+Add etags to selection. Existing etags are unchanged. The entire document is affected if nothing is selected.
 
 ##### `Remove Etags`
 
@@ -87,3 +89,12 @@ These commands are triggered externally. They cannot be manually invoked.
 ##### `Find Etag`
 
 This command is triggered by Avara's `/find` TUI command. It selects and reveals the targeted etag in your open document.
+
+## Configuration
+
+This extension looks for an optional configuration file `tylconfig.json` in your workspace's root folder. The structure of the file is as follows:
+
+- `autotag` **[Array]**
+    - List additional elements that should be [auto-tagged](#toggle-auto-tag) here. They can be other Avara built-ins, or your own macros, for instance.
+
+You can find an example configuration file [here](./examples/tylconfig.json).
