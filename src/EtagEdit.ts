@@ -3,19 +3,17 @@ const ETAG_LENGTH = 7;
 const AUTOTAG_STRING = 'autotag';
 const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
 
-export type EtagEditConfig = {
-    alsoTag?: string[]
-}
+import { tylConfig } from './config';
 
-export class EtagEdit {
+export default class EtagEdit {
     #alsoTag: { [key: string]: boolean };
 
-    constructor(config?: EtagEditConfig) {
+    constructor(config?: tylConfig) {
         this.#alsoTag = {};
         this.configure(config);
     }
 
-    private configure(config?: EtagEditConfig) {
+    private configure(config?: tylConfig) {
         if (!config) {
             return;
         }

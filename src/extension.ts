@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {EtagEdit, EtagEditConfig} from './EtagEdit';
+import EtagEdit from './EtagEdit';
 import * as editTransform from './edit-transform';
 
 type stringEdit = (s: string) => string;

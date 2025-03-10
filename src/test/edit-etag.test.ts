@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
-import {EtagEdit} from '../EtagEdit';
+import EtagEdit from '../EtagEdit';
 
 let randomStub: sinon.SinonStub;
 
