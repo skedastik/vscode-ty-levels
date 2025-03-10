@@ -3,46 +3,45 @@ const crypto = require('crypto');
 import { rules as simplificationRules } from './simplify-rules';
 import * as alf from './alf-regex';
 
-type symbolsToFuncMap = { [key: string]: string };
+type symbolToTokenMap = { [key: string]: string };
 
 class ExpressionEncoder {
-    symbolsToFuncs: symbolsToFuncMap;
+    symbolsToTokens: symbolToTokenMap;
 
-    static FUNC_REGEX = new RegExp('[a-zA-Z_][a-zA-Z0-9_\\.]*\\(.*?\\)+', 'g');
-    static SYMBOL_PREFIX = 'sym_';
+    static CONFLICTING_TOKEN_REGEX = new RegExp('[a-zA-Z_][a-zA-Z0-9_\\.]*\\(.*?\\)+|#[a-fA-F0-9]{6}', 'g');
+    static SYMBOL_PREFIX = 'tyl_sym_';
     static SYMBOL_REGEX = new RegExp(`${ExpressionEncoder.SYMBOL_PREFIX}([0-9a-f]+)`, 'g');
 
     constructor() {
-        this.symbolsToFuncs = {};
+        this.symbolsToTokens = {};
     }
 
-    // Replace all function tokens in expression as mathjs will evaluate
-    // functions (by design). There is a "clean" way to stop mathjs from doing
-    // this by passing custom rules to math.simplify, but it's *very*
-    // nontrivial.
+    // Encode certain tokens in expression that mathjs parse incorrectly. This
+    // includes function tokens (which are evaluated by design in mathjs), and
+    // hex color values like "#ffffff".
     encode(expr: string) {
-        return expr.replace(ExpressionEncoder.FUNC_REGEX, (func: string) => {
+        return expr.replace(ExpressionEncoder.CONFLICTING_TOKEN_REGEX, (token: string) => {
             // Use a hash so that identical strings map to the same symbol. This
             // is not perfect since different string representations could be
             // algebraically equivalent, but it should cover most use cases.
-            const id = crypto.createHash('md5').update(func).digest('hex');
+            const id = crypto.createHash('md5').update(token).digest('hex');
             const symbolName: string = `${ExpressionEncoder.SYMBOL_PREFIX}${id}`;
-            this.symbolsToFuncs[symbolName] = func;
+            this.symbolsToTokens[symbolName] = token;
             return symbolName;
         });
     }
     
-    // Restore function tokens in passed expression.
+    // Decode encoded tokens in passed expression.
     decode(expr: string) {
         return expr.replace(
             ExpressionEncoder.SYMBOL_REGEX,
             (match: string, id: string) => {
                 const symbol = `${ExpressionEncoder.SYMBOL_PREFIX}${id}`;
-                const func = this.symbolsToFuncs[symbol];
-                if (func === undefined) {
+                const token = this.symbolsToTokens[symbol];
+                if (token === undefined) {
                     throw new Error(`ExpressionEncoder.decode encountered unrecognized symbol "${symbol}".`);
                 }
-                return func;
+                return token;
             }
         );
     }
