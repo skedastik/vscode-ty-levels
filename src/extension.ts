@@ -75,9 +75,9 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
 export function activate(context: vscode.ExtensionContext) {
     const etagEdit = new EtagEdit();
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection(etagEdit.addEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection(etagEdit.removeEtags)));
-    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection(etagEdit.regenerateEtags)));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection((text: string ) => etagEdit.addEtags(text))));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection((text: string ) => etagEdit.removeEtags(text))));
+    context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection((text: string ) => etagEdit.regenerateEtags(text))));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
         const editor = vscode.window.activeTextEditor;
