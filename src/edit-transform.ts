@@ -1,4 +1,8 @@
-import { Transform } from './Transform';
+import {
+    Transform,
+    Rotation90Clockwise,
+    Rotation90Counterclockwise
+} from './Transform';
 
 const additionOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) + ${transformExpr}`;
 const multiplicationOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) * ${transformExpr}`;
@@ -48,14 +52,17 @@ const yMultiply = new Transform(yAttributes, multiplicationOperation);
 const angleMirrorZ = new Transform(angleAttributes, angleMirrorZOperation, false);
 const angleMirrorX = new Transform(angleAttributes, angleMirrorXOperation, false);
 const angleMirrorYRamps = new Transform(angleAttributes, angleMirrorYRampOperation, false, 'Ramp');
+const clockwise90Rotation = new Rotation90Clockwise();
+const counterclockwise90Rotation = new Rotation90Counterclockwise();
 const newParamSetTransform = (param: string, filter?: string) => new Transform([param], setOperation, true, filter);
 
 export const translateX = (text: string, transformExpr: string) => xAdd.apply(text, transformExpr);
 export const translateZ = (text: string, transformExpr: string) => zAdd.apply(text, transformExpr);
 export const translateY = (text: string, transformExpr: string) => yAdd.apply(text, transformExpr);
-
 export const mirrorZ = (text: string) => xMultiply.apply(angleMirrorZ.apply(text), '-1');
 export const mirrorX = (text: string) => zMultiply.apply(angleMirrorX.apply(text), '-1');
 export const mirrorY = (text: string) => yMultiply.apply(angleMirrorYRamps.apply(text), '-1');
+export const rotate90Clockwise = (text: string) => clockwise90Rotation.apply(text);
+export const rotate90Counterclockwise = (text: string) => counterclockwise90Rotation.apply(text);
 
 export const set = (text: string, valueExpr: string, param: string, filter?: string) => newParamSetTransform(param, filter).apply(text, valueExpr);

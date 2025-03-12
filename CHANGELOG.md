@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.12] - 2025.03.12
+
+### Added
+
+- Commands for rotating elements
+    - `Rotate 90 Degrees Clockwise`
+    - `Rotate 90 Degrees Counterclockwise`
+
+### Changed
+
+- Rename commands.
+    - `Translate Elements Along X Axis` -> `Translate Along X Axis`
+    - `Translate Elements Along Z Axis` -> `Translate Along Z Axis`
+    - `Translate Elements Along Y Axis` -> `Translate Along Y Axis`
+    - `Mirror Elements Across X Axis` -> `Mirror Across X Axis`
+    - `Mirror Elements Across Z Axis` -> `Mirror Across Z Axis`
+    - `Mirror Elements Across Y Axis` -> `Mirror Across Y Axis`
+
 ## [0.0.11] - 2025.03.10
 
 ### Changed

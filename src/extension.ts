@@ -188,6 +188,14 @@ export function activate(context: vscode.ExtensionContext) {
         editTransform.mirrorY
     )));
 
+    context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Clockwise', () => transformSelection(
+        editTransform.rotate90Clockwise
+    )));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Counterclockwise', () => transformSelection(
+        editTransform.rotate90Counterclockwise
+    )));
+
     context.subscriptions.push(vscode.commands.registerCommand('extension.setParam', () => transformSelection(
         (text: string, valueExpr: string, ...args: string[]) => editTransform.set(text, valueExpr, args[0], args[1]),
         SET_PROMPT,

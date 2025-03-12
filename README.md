@@ -14,15 +14,15 @@ Physically transform geometry and actors en masse by selecting the elements you 
 
 You will be prompted to enter a translation expression. Your expression can be a simple constant (e.g. "-2"), or more complex (e.g. "3 * mainRampWidth").
 
-##### `Translate Elements Along X Axis`
+##### `Translate Along X Axis`
 
 Add to **cx/x/xx** attributes.
 
-##### `Translate Elements Along Z Axis`
+##### `Translate Along Z Axis`
 
 Add to **cz/z/zz** attributes.
 
-##### `Translate Elements Along Y Axis`
+##### `Translate Along Y Axis`
 
 Add to **y/yy** attributes.
 
@@ -30,17 +30,29 @@ Add to **y/yy** attributes.
 
 Mirror elements across axes centered at the world origin (0,0,0).
 
-##### `Mirror Elements Across X Axis`
+##### `Mirror Across X Axis`
 
 Multiply **cz/z/zz** attributes by -1. Reflect **angle** attributes across the X axis.
 
-##### `Mirror Elements Across Z Axis`
+##### `Mirror Across Z Axis`
 
 Multiply **cx/x/xx** attributes by -1. Reflect **angle** attributes across the Z axis.
 
-##### `Mirror Elements Across Y Axis`
+##### `Mirror Across Y Axis`
 
 Multiply **y/yy** attributes by -1. Reflect ramp **angle** attributes across the Y axis. The **angle** attribute for elements other than ramps are unaffected.
+
+#### Rotation
+
+Rotate elements around the world origin (0,0,0). This affects the following attributes: **cx, x, xx, cz, z, zz, w, d, angle**.
+
+##### `Rotate 90 Degrees Clockwise`
+
+Rotate elements by +90 degrees. 
+
+##### `Rotate 90 Degrees Counterclockwise`
+
+Rotate elements by -90 degrees.
 
 #### More commands
 
