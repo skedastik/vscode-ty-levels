@@ -1,7 +1,7 @@
 const math = require('mathjs');
 const crypto = require('crypto');
-import { rules as simplificationRules } from './simplify-rules';
 import * as alf from './alf-regex';
+import { UserError } from './error';
 
 type symbolToTokenMap = { [key: string]: string };
 
@@ -48,6 +48,17 @@ class ExpressionEncoder {
 }
 
 type transformOperation = (currentExpr: string, transformExpr: string) => string;
+
+export const simplify = (expr: string) => {
+    const simplifiedExpr = math.simplify(expr, { exactFractions: false }).toString();
+    if (simplifiedExpr.indexOf('^') !== -1) {
+        // Just return the original expression if simplification yields
+        // exponentiation since the exponent operator (^) is meaningless to
+        // Jinja, Python, and Avara's parser.
+        return expr;
+    }
+    return simplifiedExpr;
+};
 
 export class Transform {
     regexTag: RegExp;
@@ -154,7 +165,7 @@ export class Transform {
         }
         const encodedExpr = this.encoder ? this.encoder.encode(expr) : expr;
         const appliedExpr = this.operation(encodedExpr, transformExpr);
-        const simplifiedExpr = this.simplifyExpressions ? math.simplify(appliedExpr, simplificationRules, {}, { exactFractions: false }).toString() : appliedExpr;
+        const simplifiedExpr = this.simplifyExpressions ? simplify(appliedExpr) : appliedExpr;
         const replacementString = [t1, simplifiedExpr, t2].join('');
 
         if (process.env.VSCODE_DEBUG_MODE) {
@@ -173,10 +184,10 @@ interface placedActorAttributes {
 };
 
 interface placedActorAttributesNumeric {
-    x: number;
-    z: number;
-    w: number;
-    d: number;
+    x: string;
+    z: string;
+    w: string;
+    d: string;
     angle: number | undefined;
 };
 
@@ -197,41 +208,47 @@ class Rotation90 {
 
     private rotatePlacedActorAttributes(attributes: placedActorAttributes) {
         const stdAttributes: placedActorAttributesNumeric = {
-            x: 0,
-            z: 0,
-            w: 0,
-            d: 0,
+            x: '',
+            z: '',
+            w: '',
+            d: '',
             angle: undefined
         };
 
-        // 1. convert to center-dimensions definition (x,z,w,d)
+        const encoder = new ExpressionEncoder();
+        const encodeSimplifyDecode = (expr: string) => encoder.decode(simplify(encoder.encode(expr)));
 
-        if (attributes.x && attributes.xx) {
-            const x = +attributes.x;
-            const xx = +attributes.xx;
-            stdAttributes.x = (x + xx) / 2;
-            stdAttributes.w = Math.abs(x - xx);
-        } else if (attributes.x && attributes.w) {
-            stdAttributes.x = +attributes.x;
-            stdAttributes.w = +attributes.w;
-        } else if (attributes.cx) {
-            stdAttributes.x = +attributes.cx;
-        }
-        
-        if (attributes.z && attributes.zz) {
-            const z = +attributes.z;
-            const zz = +attributes.zz;
-            stdAttributes.z = (z + zz) / 2;
-            stdAttributes.d = Math.abs(z - zz);
-        } else if (attributes.z && attributes.d) {
-            stdAttributes.z = +attributes.z;
-            stdAttributes.d = +attributes.d;
-        } else if (attributes.cz) {
-            stdAttributes.z = +attributes.cz;
-        }
+        // 1. convert to center-dimensions definition (x,z,w,d)
 
         if (attributes.angle) {
             stdAttributes.angle = +attributes.angle;
+            if (Number.isNaN(stdAttributes.angle)) {
+                throw new UserError('Angle values must be numeric.');
+            }
+        }
+
+        if (attributes.x && attributes.xx) {
+            const x = attributes.x;
+            const xx = attributes.xx;
+            stdAttributes.x = `(${x} + ${xx}) / 2`;
+            stdAttributes.w = `${x} - (${xx})`;
+        } else if (attributes.x && attributes.w) {
+            stdAttributes.x = attributes.x;
+            stdAttributes.w = attributes.w;
+        } else if (attributes.cx) {
+            stdAttributes.x = attributes.cx;
+        }
+        
+        if (attributes.z && attributes.zz) {
+            const z = attributes.z;
+            const zz = attributes.zz;
+            stdAttributes.z = `(${z} + ${zz}) / 2`;
+            stdAttributes.d = `${z} - (${zz})`;
+        } else if (attributes.z && attributes.d) {
+            stdAttributes.z = attributes.z;
+            stdAttributes.d = attributes.d;
+        } else if (attributes.cz) {
+            stdAttributes.z = attributes.cz;
         }
 
         // 2. apply rotation
@@ -241,23 +258,31 @@ class Rotation90 {
         // 3. convert back to original definition
 
         if (attributes.xx) {
-            attributes.x = (stdAttributes.x - stdAttributes.w / 2).toString();
-            attributes.xx = (stdAttributes.x + stdAttributes.w / 2).toString();
+            attributes.x = encodeSimplifyDecode(`${stdAttributes.x} - (${stdAttributes.w}) / 2`);
+            attributes.xx = encodeSimplifyDecode(`${stdAttributes.x} + (${stdAttributes.w}) / 2`);
         } else if (attributes.w) {
-            attributes.x = stdAttributes.x.toString();
-            attributes.w = stdAttributes.w.toString();
+            attributes.x = encodeSimplifyDecode(stdAttributes.x.toString());
+            attributes.w = encodeSimplifyDecode(stdAttributes.w.toString());
+            const w = +attributes.w;
+            if (!Number.isNaN(w)) {
+                attributes.w = Math.abs(w).toString();
+            }
         } else if (attributes.cx) {
-            attributes.cx = stdAttributes.x.toString();
+            attributes.cx = encodeSimplifyDecode(stdAttributes.x.toString());
         }
         
         if (attributes.zz) {
-            attributes.z = (stdAttributes.z - stdAttributes.d / 2).toString();
-            attributes.zz = (stdAttributes.z + stdAttributes.d / 2).toString();
+            attributes.z = encodeSimplifyDecode(`${stdAttributes.z} - (${stdAttributes.d}) / 2`);
+            attributes.zz = encodeSimplifyDecode(`${stdAttributes.z} + (${stdAttributes.d}) / 2`);
         } else if (attributes.d) {
-            attributes.z = stdAttributes.z.toString();
-            attributes.d = stdAttributes.d.toString();
+            attributes.z = encodeSimplifyDecode(stdAttributes.z.toString());
+            attributes.d = encodeSimplifyDecode(stdAttributes.d.toString());
+            const d = +attributes.d;
+            if (!Number.isNaN(d)) {
+                attributes.d = Math.abs(d).toString();
+            }
         } else if (attributes.cz) {
-            attributes.cz = stdAttributes.z.toString();
+            attributes.cz = encodeSimplifyDecode(stdAttributes.z.toString());
         }
 
         if (attributes.angle && stdAttributes.angle !== undefined) {
@@ -324,7 +349,7 @@ export class Rotation90Clockwise extends Rotation90 {
     protected applyRotation(attributes: placedActorAttributesNumeric) {
         const x = attributes.x;
         const w = attributes.w;
-        attributes.x = -attributes.z;
+        attributes.x = `-(${attributes.z})`;
         attributes.z = x;
         attributes.w = attributes.d;
         attributes.d = w;
@@ -339,7 +364,7 @@ export class Rotation90Counterclockwise extends Rotation90 {
         const x = attributes.x;
         const w = attributes.w;
         attributes.x = attributes.z;
-        attributes.z = -x;
+        attributes.z = `-(${x})`;
         attributes.w = attributes.d;
         attributes.d = w;
         if (attributes.angle !== undefined) {

@@ -30,6 +30,8 @@ Add to **y/yy** attributes.
 
 Mirror elements across axes centered at the world origin (0,0,0).
 
+⚠️ Mirroring commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
+
 ##### `Mirror Across X Axis`
 
 Multiply **cz/z/zz** attributes by -1. Reflect **angle** attributes across the X axis.
@@ -45,6 +47,8 @@ Multiply **y/yy** attributes by -1. Reflect ramp **angle** attributes across the
 #### Rotation
 
 Rotate elements around the world origin (0,0,0). This affects the following attributes: **cx, x, xx, cz, z, zz, w, d, angle**.
+
+⚠️ Rotation commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
 
 ##### `Rotate 90 Degrees Clockwise`
 

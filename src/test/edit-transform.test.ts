@@ -25,10 +25,17 @@ suite('Transform Edit Test Suite', () => {
         assert.strictEqual(edit.translateX(input, expr), expected);
     });
 
-    test('translateX + 1 with squared term', () => {
+    test('translateX + 1 with term that could result in positive exponent', () => {
         const expr = '1';
-        const input = '<Foo x="{{ x * x }}"';
-        const expected = '<Foo x="{{ x * x + 1 }}"';
+        const input = '<Foo x="{{ x * x * x * x }}"';
+        const expected = '<Foo x="{{ x * x * x * x + (1) }}"';
+        assert.strictEqual(edit.translateX(input, expr), expected);
+    });
+
+    test('translateX + 1 with term that could result in negative exponent', () => {
+        const expr = '1';
+        const input = '<Foo x="{{ (1 / x) / x }}"';
+        const expected = '<Foo x="{{ (1 / x) / x + (1) }}"';
         assert.strictEqual(edit.translateX(input, expr), expected);
     });
 

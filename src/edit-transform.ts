@@ -4,12 +4,14 @@ import {
     Rotation90Counterclockwise
 } from './Transform';
 
-const additionOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) + ${transformExpr}`;
-const multiplicationOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) * ${transformExpr}`;
+import { UserError } from './error';
+
+const additionOperation = (currentExpr: string, transformExpr: string) => `${currentExpr} + (${transformExpr})`;
+const multiplicationOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) * (${transformExpr})`;
 const angleMirrorZOperation = (currentExpr: string) => {
     let angle = Number.parseFloat(currentExpr);
     if (Number.isNaN(angle)) {
-        return currentExpr;
+        throw new UserError('Angle values must be numeric.');
     }
     angle = angle === 0 ? angle : 360 - angle;
     return angle.toString();
@@ -17,7 +19,7 @@ const angleMirrorZOperation = (currentExpr: string) => {
 const angleMirrorXOperation = (currentExpr: string) => {
     let angle = Number.parseFloat(currentExpr);
     if (Number.isNaN(angle)) {
-        return currentExpr;
+        throw new UserError('Angle values must be numeric.');
     }
     angle = angle <= 180 ? 180 - angle : 540 - angle;
     return angle.toString();
@@ -25,7 +27,7 @@ const angleMirrorXOperation = (currentExpr: string) => {
 const angleMirrorYRampOperation = (currentExpr: string) => {
     let angle = Number.parseFloat(currentExpr);
     if (Number.isNaN(angle)) {
-        return currentExpr;
+        throw new UserError('Angle values must be numeric.');
     }
     switch (angle) {
         case 0:   return '180';

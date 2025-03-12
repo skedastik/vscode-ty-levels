@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.13] - 2025.03.12
+
+### Changed
+
+- Rotation commands
+    - Support expressions in cx/x/xx/cz/z/zz/w/d attributes.
+    - Display error when encountering non-numeric angle attributes.
+- Mirroring commands
+    - Display error when encountering non-numeric angle attributes.
+
 ## [0.0.12] - 2025.03.12
 
 ### Added
