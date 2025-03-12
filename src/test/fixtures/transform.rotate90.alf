@@ -1,0 +1,19 @@
+<Foo x="4" xx="16" z="2" zz="10" y="0" />
+<Foo x="10" z="6" w="12" d="8" y="0" />
+<Foo x="4" xx="16" z="6" d="8" y="0" />
+<Foo x="10" z="2" zz="10" w="12" y="0" />
+<Foo cx="5" cz="6" />
+<Foo angle="0" />
+<Foo angle="90" />
+<Foo angle="180" />
+<Foo angle="270" />
+
+{{ Foo(x=4, xx=16, z=2, zz=10, y=0) }}
+{{ Foo(x=10, z=6, w=12, d=8, y=0) }}
+{{ Foo(x=4, xx=16, z=6, d=8, y=0) }}
+{{ Foo(x=10, z=2, zz=10, w=12, y=0) }}
+{{ Foo(cx=5, cz=6) }}
+{{ Foo(angle=0) }}
+{{ Foo(angle=90) }}
+{{ Foo(angle=180) }}
+{{ Foo(angle=270) }}

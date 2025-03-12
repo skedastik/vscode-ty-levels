@@ -49,7 +49,7 @@ class ExpressionEncoder {
 
 type transformOperation = (currentExpr: string, transformExpr: string) => string;
 
-export default class Transform {
+export class Transform {
     regexTag: RegExp;
     regexMacro: RegExp;
     encoder?: ExpressionEncoder;
@@ -71,8 +71,8 @@ export default class Transform {
             if (targetAttributes.length > 1) {
                 throw new Error('Currently the Transform class only supports one target attribute if a filter is present.');
             }
-            this.regexTag = alf.getRegexForSpecificXmlTagAttribute(targetAttributes, filter);
-            this.regexMacro = alf.getRegexForSpecificJinjaMacroParameter(targetAttributes, filter);
+            this.regexTag = alf.getRegexForSpecificXmlTagAttributes(targetAttributes, filter);
+            this.regexMacro = alf.getRegexForSpecificJinjaMacroParameters(targetAttributes, filter);
         } else {
             this.regexTag = alf.getRegexForGeneralXmlTagAttributes(targetAttributes);
             this.regexMacro = alf.getRegexForGeneralJinjaMacroParameters(targetAttributes);
@@ -114,15 +114,15 @@ export default class Transform {
         
         if (this.filter) {
             transformedText = text
-                .replace(this.regexTag, (match: string, t1: string, alt: string, expr: string, t2: string) => {
+                .replace(this.regexTag, (match: string, t1: string, alt: string, attr: string, expr: string, t2: string) => {
                     return this.replace(encodedTransformExpr, t1, expr, t2);
                 })
-                .replace(this.regexMacro, (match: string, t1: string, g2: string, expr: string, t2: string) => {
+                .replace(this.regexMacro, (match: string, t1: string, g2: string, attr: string, expr: string, t2: string) => {
                     return this.replace(encodedTransformExpr, t1, expr, t2);
                 });
         } else {
             transformedText = text
-                .replace(this.regexTag, (match: string, t1: string, alt: string, expr: string, t2: string) => {
+                .replace(this.regexTag, (match: string, t1: string, attr: string, expr: string, t2: string) => {
                     return this.replace(encodedTransformExpr, t1, expr, t2);
                 })
                 .replace(this.regexMacro, (match: string, g1: string, g2: string, g3: string, g4: string, g5: string, g6: string, g7: string, g8: string) => {
@@ -163,5 +163,187 @@ export default class Transform {
         }
 
         return replacementString;
+    }
+}
+
+const PLACED_ACTOR_ATTRIBUTES = ['cx', 'x', 'xx', 'cz', 'z', 'zz', 'w', 'd', 'angle'];
+
+interface placedActorAttributes {
+    [key: string]: string | undefined;
+};
+
+interface placedActorAttributesNumeric {
+    x: number;
+    z: number;
+    w: number;
+    d: number;
+    angle: number | undefined;
+};
+
+class Rotation90 {
+    #regexSpecificTag: RegExp;
+    #regexSpecificMacro: RegExp;
+
+    constructor() {
+        this.#regexSpecificTag = alf.getRegexForSpecificXmlTagAttributes(PLACED_ACTOR_ATTRIBUTES, alf.FILTER_ANY_ACTOR);
+        this.#regexSpecificMacro = alf.getRegexForSpecificJinjaMacroParameters(PLACED_ACTOR_ATTRIBUTES, alf.FILTER_ANY_ACTOR);
+    }
+
+    apply(text: string) {
+        return text
+            .replace(this.#regexSpecificTag, (match: string) => this.replaceTag(match))
+            .replace(this.#regexSpecificMacro, (match: string) => this.replaceMacro(match));
+    }
+
+    private rotatePlacedActorAttributes(attributes: placedActorAttributes) {
+        const stdAttributes: placedActorAttributesNumeric = {
+            x: 0,
+            z: 0,
+            w: 0,
+            d: 0,
+            angle: undefined
+        };
+
+        // 1. convert to center-dimensions definition (x,z,w,d)
+
+        if (attributes.x && attributes.xx) {
+            const x = +attributes.x;
+            const xx = +attributes.xx;
+            stdAttributes.x = (x + xx) / 2;
+            stdAttributes.w = Math.abs(x - xx);
+        } else if (attributes.x && attributes.w) {
+            stdAttributes.x = +attributes.x;
+            stdAttributes.w = +attributes.w;
+        } else if (attributes.cx) {
+            stdAttributes.x = +attributes.cx;
+        }
+        
+        if (attributes.z && attributes.zz) {
+            const z = +attributes.z;
+            const zz = +attributes.zz;
+            stdAttributes.z = (z + zz) / 2;
+            stdAttributes.d = Math.abs(z - zz);
+        } else if (attributes.z && attributes.d) {
+            stdAttributes.z = +attributes.z;
+            stdAttributes.d = +attributes.d;
+        } else if (attributes.cz) {
+            stdAttributes.z = +attributes.cz;
+        }
+
+        if (attributes.angle) {
+            stdAttributes.angle = +attributes.angle;
+        }
+
+        // 2. apply rotation
+
+        this.applyRotation(stdAttributes);
+
+        // 3. convert back to original definition
+
+        if (attributes.xx) {
+            attributes.x = (stdAttributes.x - stdAttributes.w / 2).toString();
+            attributes.xx = (stdAttributes.x + stdAttributes.w / 2).toString();
+        } else if (attributes.w) {
+            attributes.x = stdAttributes.x.toString();
+            attributes.w = stdAttributes.w.toString();
+        } else if (attributes.cx) {
+            attributes.cx = stdAttributes.x.toString();
+        }
+        
+        if (attributes.zz) {
+            attributes.z = (stdAttributes.z - stdAttributes.d / 2).toString();
+            attributes.zz = (stdAttributes.z + stdAttributes.d / 2).toString();
+        } else if (attributes.d) {
+            attributes.z = stdAttributes.z.toString();
+            attributes.d = stdAttributes.d.toString();
+        } else if (attributes.cz) {
+            attributes.cz = stdAttributes.z.toString();
+        }
+
+        if (attributes.angle && stdAttributes.angle !== undefined) {
+            attributes.angle = stdAttributes.angle.toString();
+        }
+    }
+
+    protected applyRotation(attributes: placedActorAttributesNumeric) {
+        throw new Error('Rotation90ClockwiseDegrees.applyRotation -> Unimplemented.');
+    }
+
+    // The below replacement implementations are very inefficient, but they
+    // reuse our existing regular expressions, so screw it.
+
+    private replaceTag(tag: string) {
+        const attributes: placedActorAttributes = {};
+        const rgx = alf.getRegexForGeneralXmlTagAttributes(PLACED_ACTOR_ATTRIBUTES);
+
+        let result;
+        while ((result = rgx.exec(tag)) !== null) {
+            attributes[result[2]] = result[3];
+        }
+
+        this.rotatePlacedActorAttributes(attributes);
+
+        for (const attr in attributes) {
+            tag = tag.replace(alf.getRegexForGeneralXmlTagAttributes([attr]), (match: string, t1: string, attr: string, expr: string, t2: string) => {
+                return [t1, attributes[attr], t2].join('');
+            });
+        }
+
+        return tag;
+    }
+
+    private replaceMacro(macro: string) {
+        const attributes: placedActorAttributes = {};
+        const rgx = alf.getRegexForGeneralJinjaMacroParameters(PLACED_ACTOR_ATTRIBUTES);
+
+        let result;
+        while ((result = rgx.exec(macro)) !== null) {
+            const attr = result[8] ? result[7] : result[3];
+            const value = result[8] ? result[8] : result[4];
+            attributes[attr] = value;
+        }
+
+        this.rotatePlacedActorAttributes(attributes);
+
+        for (const attr in attributes) {
+            macro = macro.replace(
+                alf.getRegexForGeneralJinjaMacroParameters([attr]),
+                (match: string, g1: string, g2: string, g3: string, g4: string, g5: string, g6: string, g7: string, g8: string) => {
+                    const t1 = g8 ? g6 : g2;
+                    const t2 = g8 ? '' : g5;
+                    return [t1, attributes[attr], t2].join('');
+                }
+            );
+        }
+
+        return macro;
+    }
+}
+
+export class Rotation90Clockwise extends Rotation90 {
+    protected applyRotation(attributes: placedActorAttributesNumeric) {
+        const x = attributes.x;
+        const w = attributes.w;
+        attributes.x = -attributes.z;
+        attributes.z = x;
+        attributes.w = attributes.d;
+        attributes.d = w;
+        if (attributes.angle !== undefined) {
+            attributes.angle = (attributes.angle + 90) % 360;
+        }
+    }
+}
+
+export class Rotation90Counterclockwise extends Rotation90 {
+    protected applyRotation(attributes: placedActorAttributesNumeric) {
+        const x = attributes.x;
+        const w = attributes.w;
+        attributes.x = attributes.z;
+        attributes.z = -x;
+        attributes.w = attributes.d;
+        attributes.d = w;
+        if (attributes.angle !== undefined) {
+            attributes.angle = (attributes.angle + 270) % 360;
+        }
     }
 }

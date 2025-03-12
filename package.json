@@ -4,7 +4,7 @@
   "description": "Avara level editing enhancements for VS Code.",
   "publisher": "skedastik",
   "repository": "https://github.com/skedastik/vscode-ty-levels",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -44,27 +44,35 @@
       },
       {
         "command": "extension.translateX",
-        "title": "Translate Elements Along X Axis"
+        "title": "Translate Along X Axis"
       },
       {
         "command": "extension.translateZ",
-        "title": "Translate Elements Along Z Axis"
+        "title": "Translate Along Z Axis"
       },
       {
         "command": "extension.translateY",
-        "title": "Translate Elements Along Y Axis"
+        "title": "Translate Along Y Axis"
       },
       {
         "command": "extension.mirrorX",
-        "title": "Mirror Elements Across X Axis"
+        "title": "Mirror Across X Axis"
       },
       {
         "command": "extension.mirrorZ",
-        "title": "Mirror Elements Across Z Axis"
+        "title": "Mirror Across Z Axis"
       },
       {
         "command": "extension.mirrorY",
-        "title": "Mirror Elements Across Y Axis"
+        "title": "Mirror Across Y Axis"
+      },
+      {
+        "command": "extension.rotate90Clockwise",
+        "title": "Rotate 90 Degrees Clockwise"
+      },
+      {
+        "command": "extension.rotate90Counterclockwise",
+        "title": "Rotate 90 Degrees Counterclockwise"
       },
       {
         "command": "extension.setParam",

@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as edit from '../edit-transform';
+import * as transform from '../Transform';
 
 suite('Transform Edit Test Suite', () => {
     test('translateX + 1', () => {
@@ -91,5 +92,17 @@ suite('Transform Edit Test Suite', () => {
         const input = '<Foo bar="#ffffff" />';
         const expected = '<Foo bar="#000000" />';
         assert.strictEqual(edit.set(input, '#000000', 'bar'), expected);
+    });
+
+    test('rotate 90 clockwise', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.rotate90.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.rotate90.clockwise.expected.alf', 'utf-8');
+        assert.strictEqual((new transform.Rotation90Clockwise()).apply(input), expected);
+    });
+
+    test('rotate 90 counterclockwise', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.rotate90.alf', 'utf-8');
+        const expected = fs.readFileSync('src/test/fixtures/transform.rotate90.counterclockwise.expected.alf', 'utf-8');
+        assert.strictEqual((new transform.Rotation90Counterclockwise()).apply(input), expected);
     });
 });
