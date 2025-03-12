@@ -38,13 +38,13 @@ suite('Transform Regex Test Suite', () => {
         assert.strictEqual(output, expected);
     });
 
-    test('Regex for specific XML tag attribute', () => {
-        const rgx = alf.getRegexForSpecificXmlTagAttribute(['j'], filter);
+    test('Regex for specific XML tag attributes', () => {
+        const rgx = alf.getRegexForSpecificXmlTagAttributes(['j'], filter);
         const input = fs.readFileSync('src/test/fixtures/alf.regex.specific.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/alf.regex.specific.xml.tag.expected.alf', 'utf-8');
 
         // function signature is duplicated from Transform.ts (yuck)
-        const output = input.replace(rgx, (match: string, t1: string, alt: string, expr: string, t2: string) => `@${t1}@${expr}@${t2}@`);
+        const output = input.replace(rgx, (match: string, t1: string, alt: string, attr: string, expr: string, t2: string) => `@${t1}@${expr}@${t2}@`);
 
         // console.log(rgx.toString());
         // console.log(output);
@@ -52,13 +52,13 @@ suite('Transform Regex Test Suite', () => {
         assert.strictEqual(output, expected);
     });
 
-    test('Regex for specific Jinja macro parameter', () => {
-        const rgx = alf.getRegexForSpecificJinjaMacroParameter(['j'], filter);
+    test('Regex for specific Jinja macro parameters', () => {
+        const rgx = alf.getRegexForSpecificJinjaMacroParameters(['j'], filter);
         const input = fs.readFileSync('src/test/fixtures/alf.regex.specific.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/alf.regex.specific.jinja.macro.expected.alf', 'utf-8');
 
         // function signature is duplicated from Transform.ts (yuck)
-        const output = input.replace(rgx, (match: string, t1: string, g2: string, expr: string, t2: string) => `@${t1}@${expr}@${t2}@`);
+        const output = input.replace(rgx, (match: string, t1: string, g2: string, attr: string, expr: string, t2: string) => `@${t1}@${expr}@${t2}@`);
 
         // console.log(rgx.toString());
         // console.log(output);

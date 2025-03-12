@@ -1,4 +1,4 @@
-import Transform from './Transform';
+import { Transform } from './Transform';
 
 const additionOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) + ${transformExpr}`;
 const multiplicationOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) * ${transformExpr}`;
