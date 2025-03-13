@@ -81,7 +81,7 @@ export default class EtagEdit {
             )
             .replace(
                 // Jinja macros
-                /\{\{\s*([a-zA-Z_][a-zA-Z0-9_\.]*)\(\s*(.*?)(\s*\)\s*\}\})/g,
+                /\{\{\s*([a-zA-Z_][a-zA-Z0-9_\.]*)\s*\(\s*(.*?)(\s*\)\s*\}\})/g,
                 (match: string, identifier: string, precedingParams: string, closingDelimiter: string) => {
                     return this.addEtagsReplacer("'", ', ', '', match, identifier, precedingParams, closingDelimiter);
                 }

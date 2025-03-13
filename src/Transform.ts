@@ -372,3 +372,47 @@ export class Rotation90Counterclockwise extends Rotation90 {
         }
     }
 }
+
+export const applyParamToEtag = (text: string, param: string, expr: string, etag: string) => {
+    const regexTag = alf.getRegexForXmlTagWithEtag(etag);
+    const regexMacro = alf.getRegexForJinjaMacroWithEtag(etag);
+    let didMatch = false;
+    let didUpdate = false;
+
+    const encoder = new ExpressionEncoder();
+    const simplifiedExpr = encoder.decode(simplify(encoder.encode(expr)));
+
+    const appliedText = text
+        .replace(regexTag, (match: string) => {
+            didMatch = true;
+            return match.replace(
+                alf.getRegexForGeneralXmlTagAttributes([param]),
+                (match: string, t1: string, attr: string, expr: string, t2: string) => {
+                    didUpdate = true;
+                    return [t1, simplifiedExpr, t2].join('');
+                }
+            );
+        })
+        .replace(regexMacro, (match: string) => {
+            didMatch = true;
+            return match.replace(
+                alf.getRegexForGeneralJinjaMacroParameters([param]),
+                (match: string, g1: string, g2: string, g3: string, g4: string, g5: string, g6: string, g7: string, g8: string) => {
+                    const t1 = g8 ? g6 : g2;
+                    const t2 = g8 ? '' : g5;
+                    didUpdate = true;
+                    return [t1, simplifiedExpr, t2].join('');
+                }
+            );
+        });
+
+    if (!didMatch) {
+        throw new UserError('Etag not found.');
+    }
+
+    if (!didUpdate) {
+        throw new UserError(`Param "${param}" does not exist on element with etag "${etag}".`);
+    }
+
+    return appliedText;
+};

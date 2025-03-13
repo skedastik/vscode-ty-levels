@@ -87,3 +87,5 @@
 
 {{ NotASolid() }}
 {{ NotASolid() }}
+
+{{ Wall () }}

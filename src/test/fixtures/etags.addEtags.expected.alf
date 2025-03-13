@@ -87,3 +87,5 @@
 
 {{ NotASolid() }}
 {{ NotASolid(etag='existingTag') }}
+
+{{ Wall (etag='0000000') }}

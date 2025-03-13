@@ -4,11 +4,12 @@ import * as editTransform from './edit-transform';
 import { ConfigAutoLoader, tylConfig } from './config';
 import { UserError } from './error';
 import { debounce } from './util';
+import { execSync } from 'child_process';
 
 type stringEdit = (s: string) => string;
 
 // Edit the currently selected text or the entire document if no text is selected.
-const editSelection = (edit: stringEdit) => {
+const editSelection = async (edit: stringEdit) => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         return;
@@ -24,17 +25,20 @@ const editSelection = (edit: stringEdit) => {
         range = new vscode.Range(selection.start, selection.end);
         text = document.getText(selection);
     }
-    editor.edit(editBuilder => {
+    await editor.edit(editBuilder => {
         editBuilder.replace(range, edit(text));
     });
 };
 
-let lastInputValue: string = '0';
+let lastInputValue: string = '';
 const TRANSLATE_PROMPT = 'Enter translation expression. Example: "-2" or "2 * myVar"';
-const SET_PROMPT = 'Enter: {<param>,<value>,<element(optional)>}. Examples: "w,5" or "shape,bspGrenade,Goody"';
 
-type transformEdit = (transformExpr: string, text: string, ...args: string[]) => string;
+type transformEdit = (text: string, transformExpr: string, ...args: string[]) => string;
 type argSplitter = (argString: string) => string[];
+
+type commandParams = {
+    [key: string]: string
+}
 
 // Transform (translate/mirror etc.) elements
 const transformSelection = async (edit: transformEdit, prompt?: string, splitter?: argSplitter) => {
@@ -49,6 +53,7 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
             if (!input) {
                 return;
             }
+            lastInputValue = input;
             expr = input;
             if (splitter) {
                 args = splitter(input);
@@ -56,8 +61,7 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
                 args = args.slice(1);
             }
         }
-        editSelection((text) => edit(text, expr, ...args));
-        lastInputValue = expr;
+        await editSelection((text) => edit(text, expr, ...args));
     }
     catch (error) {
         if (error instanceof UserError) {
@@ -79,33 +83,44 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection((text: string ) => etagEdit.removeEtags(text))));
     context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection((text: string ) => etagEdit.regenerateEtags(text))));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (args) => {
+    context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (commandParams) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return;
         }
         const document = editor.document;
         const text = document.getText();
-        const etag = args['etag'];
+        const etag = commandParams['etag'];
         if (!etag) {
             return;
         }
-        const index = text.indexOf(etag);
-        if (index !== -1) {
-            const start = document.positionAt(index);
-            const end = document.positionAt(index + etag.length);
-            editor.selection = new vscode.Selection(start, end);
-            editor.revealRange(new vscode.Range(start, end));
-        } else {
-            vscode.window.showErrorMessage('Etag not found.');
+        const regex = new RegExp(`[\\s(]\\s*etag\\s*=\\s*["']${etag}["']`);
+        const match = regex.exec(text);
+        if (!match) {
+            vscode.window.showErrorMessage(`Etag "${etag}" not found.`);
+            return;
         }
+        const index = text.indexOf(etag);
+        const start = document.positionAt(index);
+        const end = document.positionAt(index + etag.length);
+        editor.selection = new vscode.Selection(start, end);
+        editor.revealRange(new vscode.Range(start, end));
     }));
 
     context.subscriptions.push(vscode.window.registerUriHandler({
         handleUri(uri: vscode.Uri) {
-            const params = new URLSearchParams(uri.query);
-            const data = Object.fromEntries(params.entries());
-            vscode.commands.executeCommand("extension.findEtag", data);
+            const url = new URL(uri);
+            const queryParams = new URLSearchParams(uri.query);
+            const commandParams = Object.fromEntries(queryParams.entries());
+            const command = url.pathname.split('/').pop();
+            switch (command) {
+                case 'extension.findEtag':
+                case 'extension.setParamOnEtag':
+                    vscode.commands.executeCommand(command, commandParams);
+                    break;
+                default:
+                    vscode.window.showInformationMessage(`Invalid command "${command}".`);
+            }
         }
     }));
 
@@ -198,7 +213,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.setParam', () => transformSelection(
         (text: string, valueExpr: string, ...args: string[]) => editTransform.set(text, valueExpr, args[0], args[1]),
-        SET_PROMPT,
+        'Enter: {<param>,<value>,<element(optional)>}. Examples: "w,5" or "shape,bspGrenade,Goody"',
         (argString) => {
             let args = argString.split(',');
             if (args.length < 2) {
@@ -210,6 +225,21 @@ export function activate(context: vscode.ExtensionContext) {
             return args;
         }
     )));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.setParamOnEtag', async (commandParams) => {
+        const etag = commandParams.etag;
+        if (!etag) {
+            vscode.window.showInformationMessage('Command missing "etag" param.');
+        }
+        delete commandParams.etag;
+        await transformSelection((text: string) => {
+            for (const param in commandParams) {
+                text = editTransform.setOnEtag(text, commandParams[param], param, etag);
+            }
+            return text;
+        });
+        vscode.commands.executeCommand('extension.findEtag', { etag });
+    }));
 
     const configAutoLoader = new ConfigAutoLoader(
         context,

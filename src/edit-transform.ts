@@ -1,7 +1,8 @@
 import {
     Transform,
     Rotation90Clockwise,
-    Rotation90Counterclockwise
+    Rotation90Counterclockwise,
+    applyParamToEtag
 } from './Transform';
 
 import { UserError } from './error';
@@ -68,3 +69,4 @@ export const rotate90Clockwise = (text: string) => clockwise90Rotation.apply(tex
 export const rotate90Counterclockwise = (text: string) => counterclockwise90Rotation.apply(text);
 
 export const set = (text: string, valueExpr: string, param: string, filter?: string) => newParamSetTransform(param, filter).apply(text, valueExpr);
+export const setOnEtag = (text: string, valueExpr: string, param: string, etag: string) => applyParamToEtag(text, param, valueExpr, etag);
