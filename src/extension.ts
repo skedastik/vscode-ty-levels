@@ -29,11 +29,10 @@ const editSelection = (edit: stringEdit) => {
     });
 };
 
-let lastInputValue: string = '0';
+let lastInputValue: string = '';
 const TRANSLATE_PROMPT = 'Enter translation expression. Example: "-2" or "2 * myVar"';
-const SET_PROMPT = 'Enter: {<param>,<value>,<element(optional)>}. Examples: "w,5" or "shape,bspGrenade,Goody"';
 
-type transformEdit = (transformExpr: string, text: string, ...args: string[]) => string;
+type transformEdit = (text: string, transformExpr: string, ...args: string[]) => string;
 type argSplitter = (argString: string) => string[];
 
 // Transform (translate/mirror etc.) elements
@@ -49,6 +48,7 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
             if (!input) {
                 return;
             }
+            lastInputValue = input;
             expr = input;
             if (splitter) {
                 args = splitter(input);
@@ -57,7 +57,6 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
             }
         }
         editSelection((text) => edit(text, expr, ...args));
-        lastInputValue = expr;
     }
     catch (error) {
         if (error instanceof UserError) {
@@ -198,11 +197,26 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.setParam', () => transformSelection(
         (text: string, valueExpr: string, ...args: string[]) => editTransform.set(text, valueExpr, args[0], args[1]),
-        SET_PROMPT,
+        'Enter: {<param>,<value>,<element(optional)>}. Examples: "w,5" or "shape,bspGrenade,Goody"',
         (argString) => {
             let args = argString.split(',');
             if (args.length < 2) {
                 throw new UserError('Invalid input. Expected at least two comma-separated arguments.');
+            }
+            let param = args[0];
+            args[0] = args[1];
+            args[1] = param;
+            return args;
+        }
+    )));
+
+    context.subscriptions.push(vscode.commands.registerCommand('extension.setParamOnEtag', () => transformSelection(
+        (text: string, valueExpr: string, ...args: string[]) => editTransform.setOnEtag(text, valueExpr, args[0], args[1]),
+        'Enter: {<param>,<value>,<etag>}. Example: "w,5,nq7516f"',
+        (argString) => {
+            let args = argString.split(',');
+            if (args.length < 3) {
+                throw new UserError('Invalid input. Expected three comma-separated arguments.');
             }
             let param = args[0];
             args[0] = args[1];

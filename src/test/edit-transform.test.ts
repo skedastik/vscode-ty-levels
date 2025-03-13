@@ -112,4 +112,18 @@ suite('Transform Edit Test Suite', () => {
         const expected = fs.readFileSync('src/test/fixtures/transform.rotate90.counterclockwise.expected.alf', 'utf-8');
         assert.strictEqual((new transform.Rotation90Counterclockwise()).apply(input), expected);
     });
+
+    test('setOnEtag', () => {
+        const input = fs.readFileSync('src/test/fixtures/transform.setOnEtag.alf', 'utf-8');
+        let expected;
+
+        expected = fs.readFileSync('src/test/fixtures/transform.setOnEtag.02uojx3.1.expected.alf', 'utf-8');
+        assert.strictEqual(transform.applyParamToEtag(input, 'target', '1', '02uojx3'), expected);
+
+        expected = fs.readFileSync('src/test/fixtures/transform.setOnEtag.9qwrynr.expr.expected.alf', 'utf-8');
+        assert.strictEqual(transform.applyParamToEtag(input, 'target', 'x + 1 + 2', '9qwrynr'), expected);
+
+        expected = fs.readFileSync('src/test/fixtures/transform.setOnEtag.srcchf0.1.expected.alf', 'utf-8');
+        assert.strictEqual(transform.applyParamToEtag(input, 'target', '1', 'srcchf0'), expected);
+    });
 });

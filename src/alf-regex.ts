@@ -19,5 +19,13 @@ export const getRegexForSpecificXmlTagAttributes = (attrs: string[], filter: str
 
 // Specific Jinja macro params (i.e. `Foo(x=0)` or `Foo(x=myVar+2)`)
 export const getRegexForSpecificJinjaMacroParameters = (attrs: string[], filter: string) => new RegExp(
-    `({{\\s*${filter}(\\(\\s*|.+?[,\\s]|)(${attrs.join('|')})\\s*=\\s*)([^,\\}]+)(\\)\\s*\\}\\}|,.*?\\}\\})`, 'g'
+    `({{\\s*${filter}(\\(\\s*|.+?[,\\s])(${attrs.join('|')})\\s*=\\s*)([^,\\}]+)(\\)\\s*\\}\\}|,.*?\\}\\})`, 'g'
+);
+
+export const getRegexForXmlTagWithEtag = (etag: string) => new RegExp(
+    `(<${FILTER_ANY_ACTOR}(\\s+[^>]*?\\s+|\\s+)etag\\s*=\\s*["']\\s*${etag}\\s*["']\\s*.*?\\/>)`, 's'
+);
+
+export const getRegexForJinjaMacroWithEtag = (etag: string) => new RegExp(
+    `({{\\s*${FILTER_ANY_ACTOR}(\\(\\s*|.+?[,\\s])etag\\s*=["']\\s*${etag}\\s*["'].*?\\}\\})`
 );

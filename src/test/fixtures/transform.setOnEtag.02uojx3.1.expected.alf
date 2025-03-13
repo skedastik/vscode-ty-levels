@@ -1,0 +1,89 @@
+<Wall etag="az59d3a" />
+<Sphere etag="st657j7" />
+<Solid etag="kmm61u4" />
+<WallSolid target="{{ 0 }}" etag="9qwrynr" />
+<FreeSolid etag="ecs4fsa" />
+<Dome etag="zttbjd2" />
+<Ramp etag="cvp191m" />
+<TriPyramid etag="asosupr" />
+<Door etag="upjutq8" />
+<Door2 etag="4cuitil" />
+<WallDoor etag="giyar9r" />
+<Switch etag="nq7516f" />
+<Guard etag="ipbwyjl" />
+<Pill etag="jbqir9s" />
+<Ball etag="viq18qk" />
+<Mine etag="wxxru07" />
+<Parasite etag="ruzypfy" />
+<Ufo etag="j1dd92j" />
+
+<Wall etag="loi1wrn" />
+<Wall etag="3r5liub" />
+<Wall etag="6nunln0" />
+<Wall foo="bar" etag="ye5eqpf" />
+<Wall etag="or337tw" baz="qux" />
+
+<Wall etag="{{ expression }}" />
+
+<Wall
+    foo="bar" etag="o14ar1d"
+/>
+<Wall
+    etag="5ol5nm6"
+    foo="bar"
+/>
+<Wall
+    foo="bar"
+    etag="2aq8vgc"
+/>
+<Wall
+    foo="bar"
+    etag="02uojx3"
+    target="1"
+/>
+<Wall
+    etag="58bkjvh" foo="bar"
+/>
+<Wall
+    foo="bar" etag="9h89knx"
+/>
+<Wall
+    foo="bar" etag="y8ivu56" baz="qux"
+/>
+
+<NotASolid />
+<NotASolid etag="dobusas" />
+
+<Wall etag='4l1nih9' />
+
+<Wall fakeetag="fakeExistingTag" etag="8zundcv" />
+
+{{ Wall(etag='afmrw2y') }}
+{{ Sphere(etag='jfdzkoi') }}
+{{ Solid(etag='1mm4uol') }}
+{{ WallSolid(etag='7eoo73c') }}
+{{ FreeSolid(etag='yvthj0w') }}
+{{ Dome(etag='r8hzk9j') }}
+{{ Ramp(target=0, etag='srcchf0') }}
+{{ TriPyramid(etag='22xtypz') }}
+{{ Door(etag='gpfc7ht') }}
+{{ Door2(etag='w2dyn1g') }}
+{{ WallDoor(etag='i5qu7rt') }}
+{{ Switch(etag='in05u3o') }}
+{{ Guard(etag='72pnbzy') }}
+{{ Pill(etag='vxao3fl') }}
+{{ Ball(etag='jkafn84') }}
+{{ Mine(etag='qv9iifv') }}
+{{ Parasite(etag='otqzjru') }}
+{{ Ufo(etag='z9j4f30') }}
+
+{{ Wall(foo='bar', etag='1wsdhmi') }}
+{{ Wall(etag='lqwl4uf') }}
+{{ Wall(etag='3731tvc', foo='bar') }}
+{{ Wall(foo='bar', etag='cjba1jv') }}
+{{ Wall(foo='bar', etag='5p9iw1g') }}
+
+{{ Wall(etag=expression) }}
+
+{{ NotASolid() }}
+{{ NotASolid(etag='g4dsi07') }}

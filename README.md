@@ -62,15 +62,19 @@ Rotate elements by -90 degrees.
 
 ##### `Set Param`
 
-Set a specific param/attribute to a given value. You will be prompted to enter arguments matching this format: `{<param>,<value>,<element (optional)>}`. Examples:
+Change a specific param/attribute to a given value. You will be prompted to enter arguments matching this format: `{<param>,<value>,<element (optional)>}`. Examples:
 
     w,5
     
-        Set all `w` params/attributes to `5`.
+        Change all `w` params/attributes to `5`.
 
     shape,bspGrenade,Goody
 
-        Set `shape` params/attributes to `bspGrenade` on all `Goody` elements.
+        Change `shape` params/attributes to `bspGrenade` on all `Goody` elements.
+
+##### `Set Param on Element with Etag`
+
+Like [`Set Param`](#set-param) but for the element with the given etag. There is no need to call this command manually. It is triggered through Avara's `/set` TUI command.
 
 ### Tagging
 

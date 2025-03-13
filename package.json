@@ -77,6 +77,10 @@
       {
         "command": "extension.setParam",
         "title": "Set Param"
+      },
+      {
+        "command": "extension.setParamOnEtag",
+        "title": "Set Param on Element with Etag"
       }
     ],
     "keybindings": [
