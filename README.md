@@ -74,7 +74,7 @@ Change a specific param/attribute to a given value. You will be prompted to ente
 
 ##### `Set Param on Element with Etag`
 
-Like [`Set Param`](#set-param) but for the element with the given etag. There is no need to call this command manually. It is triggered through Avara's `/set` TUI command.
+This command is triggered by Avara's `/set` TUI command. It is like [`Set Param`](#set-param), but targets an element with a given etag.
 
 ### Tagging
 
