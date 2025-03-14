@@ -1,0 +1,22 @@
+{
+    "name": "node-ty-levels",
+    "description": "Avara level editing utilities.",
+    "author": "skedastik",
+    "repository": "https://github.com/skedastik/vscode-ty-levels",
+    "version": "0.0.1",
+    "engines": {
+        "node": ">=16"
+    },
+    "main": "./dist/bundle.js",
+    "scripts": {
+      "build": "node build.js"
+    },
+    "dependencies": {
+        "mathjs": "^14.3.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.10",
+        "esbuild": "^0.25.1",
+        "typescript": "^5.8.2"
+    }
+}
