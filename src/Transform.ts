@@ -8,7 +8,7 @@ type symbolToTokenMap = { [key: string]: string };
 class ExpressionEncoder {
     symbolsToTokens: symbolToTokenMap;
 
-    static CONFLICTING_TOKEN_REGEX = new RegExp('[a-zA-Z_][a-zA-Z0-9_\\.]*\\(.*?\\)+|#[a-fA-F0-9]{6}', 'g');
+    static CONFLICTING_TOKEN_REGEX = new RegExp('[a-zA-Z_][a-zA-Z0-9_\\.]*\\(.*?\\)+|#[a-fA-F0-9]+', 'g');
     static SYMBOL_PREFIX = 'tyl_sym_';
     static SYMBOL_REGEX = new RegExp(`${ExpressionEncoder.SYMBOL_PREFIX}([0-9a-f]+)`, 'g');
 
