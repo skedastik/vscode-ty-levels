@@ -4,7 +4,6 @@ import * as editTransform from './edit-transform';
 import { ConfigAutoLoader, tylConfig } from './config';
 import { UserError } from './error';
 import { debounce } from './util';
-import { execSync } from 'child_process';
 
 type stringEdit = (s: string) => string;
 
