@@ -144,11 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
  
     context.subscriptions.push(vscode.workspace.onWillSaveTextDocument((event: vscode.TextDocumentWillSaveEvent) => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            return;
-        }
-        const document = editor.document;
+        const document = event.document;
         const text = document.getText();
         if (EtagEdit.isAutotagEnabled(text)) {
             const textEdit = new vscode.TextEdit(new vscode.Range(0, 0, document.lineCount, 0), etagEdit.addEtags(text));
