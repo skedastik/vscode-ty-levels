@@ -128,3 +128,4 @@
 {{ Bar(j=2+abs(cos(a))) }}
 {{ Bar(j=2+abs(math.cos(a))) }}
 {{Bar(j=2+abs(math.cos(a)),i=2*j,jj=fn((fn(b)-fn(c))))}}
+{{ Bar (j=2) }}

@@ -87,3 +87,5 @@
 
 {{ NotASolid() }}
 {{ NotASolid(etag='0000000') }}
+
+{{ Wall () }}

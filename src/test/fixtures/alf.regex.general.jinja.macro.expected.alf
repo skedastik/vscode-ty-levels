@@ -66,3 +66,4 @@
 {{ Foo@(j=@2+abs(cos(a))@) }@}
 {{ Foo@(j=@2+abs(math.cos(a))@) }@}
 {{Foo@(j=@2+abs(math.cos(a))@@,i=2*j@,jj=@fn((fn(b)-fn(c)))@)}@}
+{{ Foo @(j=@2@) }@}
