@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.17] - 2025.03.15
+
+### Added
+
+- `node-ty-levels` NPM package
+    - This publishable package allows other tools to reuse the ALF transformation logic found in this repo.
+
+### Changed
+
+- Search all open docments in response to Avara's `/find` TUI command instead of just the active document.
+
 ## [0.0.16] - 2025.03.14
 
 ### Changed

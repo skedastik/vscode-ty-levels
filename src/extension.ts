@@ -82,28 +82,38 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection((text: string ) => etagEdit.removeEtags(text))));
     context.subscriptions.push(vscode.commands.registerCommand('extension.regenerateEtags', () => editSelection((text: string ) => etagEdit.regenerateEtags(text))));
 
-    context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', (commandParams) => {
+    context.subscriptions.push(vscode.commands.registerCommand('extension.findEtag', async (commandParams) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             return;
         }
-        const document = editor.document;
-        const text = document.getText();
+
         const etag = commandParams['etag'];
         if (!etag) {
             return;
         }
         const regex = new RegExp(`[\\s(]\\s*etag\\s*=\\s*["']${etag}["']`);
-        const match = regex.exec(text);
-        if (!match) {
-            vscode.window.showErrorMessage(`Etag "${etag}" not found.`);
-            return;
+
+        const openDocuments = vscode.workspace.textDocuments;
+        for (const document of openDocuments) {
+            const text = document.getText();
+            const match = regex.exec(text);
+
+            if (match) {
+                const index = text?.indexOf(etag);
+                const start = document.positionAt(index);
+                const end = document.positionAt(index + etag.length);
+
+                const openedEditor = await vscode.window.showTextDocument(document, { preview: false });
+
+                openedEditor.selection = new vscode.Selection(start, end);
+                openedEditor.revealRange(new vscode.Range(start, end));
+
+                return;
+            }
         }
-        const index = text.indexOf(etag);
-        const start = document.positionAt(index);
-        const end = document.positionAt(index + etag.length);
-        editor.selection = new vscode.Selection(start, end);
-        editor.revealRange(new vscode.Range(start, end));
+    
+        vscode.window.showErrorMessage(`Etag "${etag}" not found. Is the right ALF document open?`);
     }));
 
     context.subscriptions.push(vscode.window.registerUriHandler({
