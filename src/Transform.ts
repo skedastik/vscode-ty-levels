@@ -5,7 +5,10 @@ import { UserError } from './error';
 import { isNumericString } from './util';
 const { performance } = require('perf_hooks');
 
-export let tMathJs = 0;
+export const tMathJs = {
+    simplifyElapsed: 0,
+    simplifyInvocations: 0
+};
 
 type symbolToTokenMap = { [key: string]: string };
 
@@ -56,7 +59,8 @@ type transformOperation = (currentExpr: string, transformExpr: string) => string
 export const simplify = (expr: string) => {
     const t = performance.now();
     const simplifiedExpr = math.simplify(expr, { exactFractions: false }).toString();
-    tMathJs += performance.now() - t;
+    tMathJs.simplifyElapsed += performance.now() - t;
+    tMathJs.simplifyInvocations++;
     if (simplifiedExpr.indexOf('^') !== -1) {
         // Just return the original expression if simplification yields
         // exponentiation since the exponent operator (^) is meaningless to
