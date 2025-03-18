@@ -38,6 +38,9 @@ const angleMirrorYRampOperation = (currentExpr: string) => {
     return currentExpr;
 };
 const coordMirrorOperation = (currentExpr: string, transformExpr: string) => {
+    if (transformExpr === '') {
+        transformExpr = '0';
+    }
     if (Number.isNaN(Number.parseFloat(transformExpr))) {
         throw new UserError('Coordinate must be numeric.');
     }
