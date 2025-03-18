@@ -104,13 +104,13 @@ suite('Transform Edit Test Suite', () => {
     test('rotate 90 clockwise', () => {
         const input = fs.readFileSync('src/test/fixtures/transform.rotate90.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/transform.rotate90.clockwise.expected.alf', 'utf-8');
-        assert.strictEqual((new transform.Rotation90Clockwise()).apply(input), expected);
+        assert.strictEqual((new transform.Rotation90Clockwise('0', '0')).apply(input), expected);
     });
 
     test('rotate 90 counterclockwise', () => {
         const input = fs.readFileSync('src/test/fixtures/transform.rotate90.alf', 'utf-8');
         const expected = fs.readFileSync('src/test/fixtures/transform.rotate90.counterclockwise.expected.alf', 'utf-8');
-        assert.strictEqual((new transform.Rotation90Counterclockwise()).apply(input), expected);
+        assert.strictEqual((new transform.Rotation90Counterclockwise('0', '0')).apply(input), expected);
     });
 
     test('setOnEtag', () => {

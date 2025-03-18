@@ -192,10 +192,17 @@ interface placedActorAttributesNumeric {
 };
 
 class Rotation90 {
+    x: string;
+    z: string;
     #regexSpecificTag: RegExp;
     #regexSpecificMacro: RegExp;
 
-    constructor() {
+    constructor(x: string = '0', z: string = '0') {
+        if (Number.isNaN(Number.parseFloat(x)) || Number.isNaN(Number.parseFloat(z))) {
+            throw new UserError('Center of rotation coordinates must be numeric.');
+        }
+        this.x = x;
+        this.z = z;
         this.#regexSpecificTag = alf.getRegexForSpecificXmlTagAttributes(PLACED_ACTOR_ATTRIBUTES, alf.FILTER_ANY_ACTOR);
         this.#regexSpecificMacro = alf.getRegexForSpecificJinjaMacroParameters(PLACED_ACTOR_ATTRIBUTES, alf.FILTER_ANY_ACTOR);
     }
@@ -349,8 +356,8 @@ export class Rotation90Clockwise extends Rotation90 {
     protected applyRotation(attributes: placedActorAttributesNumeric) {
         const x = attributes.x;
         const w = attributes.w;
-        attributes.x = `-(${attributes.z})`;
-        attributes.z = x;
+        attributes.x = `(${this.x}) - (${attributes.z}) + (${this.z})`;
+        attributes.z = `(${this.z}) + ${x} - (${this.x})`;
         attributes.w = attributes.d;
         attributes.d = w;
         if (attributes.angle !== undefined) {
@@ -363,8 +370,8 @@ export class Rotation90Counterclockwise extends Rotation90 {
     protected applyRotation(attributes: placedActorAttributesNumeric) {
         const x = attributes.x;
         const w = attributes.w;
-        attributes.x = attributes.z;
-        attributes.z = `-(${x})`;
+        attributes.x = `(${this.x}) + ${attributes.z} - (${this.z})`;
+        attributes.z = `(${this.z}) - (${x}) + (${this.x})`;
         attributes.w = attributes.d;
         attributes.d = w;
         if (attributes.angle !== undefined) {

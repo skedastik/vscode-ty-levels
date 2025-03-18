@@ -68,8 +68,8 @@ const angleMirrorYRamps = new Transform(angleAttributes, angleMirrorYRampOperati
 const coordMirrorZ = new Transform(xAttributes, coordMirrorOperation);
 const coordMirrorX = new Transform(zAttributes, coordMirrorOperation);
 const coordMirrorY = new Transform(yAttributes, coordMirrorOperation);
-const clockwise90Rotation = new Rotation90Clockwise();
-const counterclockwise90Rotation = new Rotation90Counterclockwise();
+const newClockwise90Rotation = (x: string, z: string) => new Rotation90Clockwise(x, z);
+const newCounterclockwise90Rotation = (x: string, z: string) => new Rotation90Counterclockwise(x, z);
 const newParamSetTransform = (param: string, filter?: string) => new Transform([param], setOperation, true, filter);
 
 const compose = (...transforms: Transform[]) => (text: string, transformExpr: string) => transforms.reduceRight(
@@ -83,8 +83,8 @@ export const translateY = (text: string, transformExpr: string) => yAdd.apply(te
 export const mirrorX = compose(coordMirrorX, angleMirrorX);
 export const mirrorZ = compose(coordMirrorZ, angleMirrorZ);
 export const mirrorY = compose(coordMirrorY, angleMirrorYRamps);
-export const rotate90Clockwise = (text: string) => clockwise90Rotation.apply(text);
-export const rotate90Counterclockwise = (text: string) => counterclockwise90Rotation.apply(text);
+export const rotate90Clockwise = (text: string, x: string, z: string) => newClockwise90Rotation(x, z).apply(text);
+export const rotate90Counterclockwise = (text: string, x: string, z: string) => newCounterclockwise90Rotation(x, z).apply(text);
 
 export const set = (text: string, valueExpr: string, param: string, filter?: string) => newParamSetTransform(param, filter).apply(text, valueExpr);
 export const setOnEtag = (text: string, valueExpr: string, param: string, etag: string) => applyParamToEtag(text, param, valueExpr, etag);
