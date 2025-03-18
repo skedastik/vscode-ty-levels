@@ -2,8 +2,12 @@ import {
     Transform,
     Rotation90Clockwise,
     Rotation90Counterclockwise,
-    applyParamToEtag
+    applyParamToEtag,
+    tMathJs
 } from './Transform';
+import { isNumericString } from './util';
+
+export { tMathJs };
 
 import { UserError } from './error';
 

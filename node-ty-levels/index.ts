@@ -6,7 +6,8 @@ import {
     mirrorX,
     mirrorY,
     rotate90Clockwise,
-    rotate90Counterclockwise
+    rotate90Counterclockwise,
+    tMathJs
 } from '../src/edit-transform';
 
 export { translateX };
@@ -17,3 +18,4 @@ export { mirrorX };
 export { mirrorY };
 export { rotate90Clockwise };
 export { rotate90Counterclockwise };
+export { tMathJs };

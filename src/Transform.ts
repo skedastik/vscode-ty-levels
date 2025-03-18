@@ -2,6 +2,9 @@ const math = require('mathjs');
 const crypto = require('crypto');
 import * as alf from './alf-regex';
 import { UserError } from './error';
+const { performance } = require('perf_hooks');
+
+export let tMathJs = 0;
 
 type symbolToTokenMap = { [key: string]: string };
 
@@ -50,7 +53,9 @@ class ExpressionEncoder {
 type transformOperation = (currentExpr: string, transformExpr: string) => string;
 
 export const simplify = (expr: string) => {
+    const t = performance.now();
     const simplifiedExpr = math.simplify(expr, { exactFractions: false }).toString();
+    tMathJs += performance.now() - t;
     if (simplifiedExpr.indexOf('^') !== -1) {
         // Just return the original expression if simplification yields
         // exponentiation since the exponent operator (^) is meaningless to
