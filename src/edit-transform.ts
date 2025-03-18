@@ -7,7 +7,12 @@ import {
 
 import { UserError } from './error';
 
-const additionOperation = (currentExpr: string, transformExpr: string) => `${currentExpr} + (${transformExpr})`;
+const additionOperation = (currentExpr: string, transformExpr: string) => {
+    if (transformExpr === '') {
+        throw new UserError('Missing argument.');
+    }
+    return `${currentExpr} + (${transformExpr})`;
+};
 const angleMirrorZOperation = (currentExpr: string) => {
     let angle = Number.parseFloat(currentExpr);
     if (Number.isNaN(angle)) {
@@ -86,6 +91,9 @@ export const setOnEtag = (text: string, valueExpr: string, param: string, etag: 
 
 // these edits can be applied via auto-edit tags
 export const automatable = {
+    translateX,
+    translateZ,
+    translateY,
     mirrorZ,
     mirrorX,
     mirrorY,
