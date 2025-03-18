@@ -18,26 +18,26 @@ const additionOperation = (currentExpr: string, transformExpr: string) => {
     return `${currentExpr} + (${transformExpr})`;
 };
 const angleMirrorZOperation = (currentExpr: string) => {
-    let angle = Number.parseFloat(currentExpr);
-    if (Number.isNaN(angle)) {
+    if (!isNumericString(currentExpr)) {
         throw new UserError('Angle values must be numeric.');
     }
+    let angle = Number.parseFloat(currentExpr);
     angle = angle === 0 ? angle : 360 - angle;
     return angle.toString();
 };
 const angleMirrorXOperation = (currentExpr: string) => {
-    let angle = Number.parseFloat(currentExpr);
-    if (Number.isNaN(angle)) {
+    if (!isNumericString(currentExpr)) {
         throw new UserError('Angle values must be numeric.');
     }
+    let angle = Number.parseFloat(currentExpr);
     angle = angle <= 180 ? 180 - angle : 540 - angle;
     return angle.toString();
 };
 const angleMirrorYRampOperation = (currentExpr: string) => {
-    let angle = Number.parseFloat(currentExpr);
-    if (Number.isNaN(angle)) {
+    if (!isNumericString(currentExpr)) {
         throw new UserError('Angle values must be numeric.');
     }
+    let angle = Number.parseFloat(currentExpr);
     switch (angle) {
         case 0:   return '180';
         case 90:  return '270';
@@ -50,7 +50,7 @@ const coordMirrorOperation = (currentExpr: string, transformExpr: string) => {
     if (transformExpr === '') {
         transformExpr = '0';
     }
-    if (Number.isNaN(Number.parseFloat(transformExpr))) {
+    if (!isNumericString(transformExpr)) {
         throw new UserError('Coordinate must be numeric.');
     }
     return `2 * (${transformExpr}) - (${currentExpr})`;
