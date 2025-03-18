@@ -42,7 +42,7 @@ Reflect **cx/x/xx** and **angle** attributes across the Z axis.
 
 ##### `Mirror Across Y Axis`
 
-Reflect **y/yy** and ramp **angle** attributes across the Y axis. The **angle** attribute for elements other than ramps is unaffected.
+Reflect **y/yy** and ramp **angle** attributes across the Y plane. The **angle** attribute for elements other than ramps is unaffected.
 
 #### Rotation
 
