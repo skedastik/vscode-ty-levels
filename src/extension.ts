@@ -30,7 +30,8 @@ const editSelection = async (edit: stringEdit) => {
 };
 
 let lastInputValue: string = '';
-const TRANSLATE_PROMPT = 'Enter translation expression. Example: "-2" or "2 * myVar"';
+const getTranslatePrompt = () => 'Enter translation expression. Example: "-2" or "2 * myVar"';
+const getMirrorPrompt = (coord: string) => `Enter ${coord}-coordinate to reflect across.`;
 
 type transformEdit = (text: string, transformExpr: string, ...args: string[]) => string;
 type argSplitter = (argString: string) => string[];
@@ -183,32 +184,32 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', () => transformSelection(
         editTransform.translateX,
-        TRANSLATE_PROMPT
+        getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', () => transformSelection(
         editTransform.translateZ,
-        TRANSLATE_PROMPT
+        getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', () => transformSelection(
         editTransform.translateY,
-        TRANSLATE_PROMPT
+        getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', () => transformSelection(
         editTransform.mirrorX,
-        'Enter Z-coordinate to reflect across.'
+        getMirrorPrompt('Z')
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', () => transformSelection(
         editTransform.mirrorZ,
-        'Enter X-coordinate to reflect across.'
+        getMirrorPrompt('X')
     )));
     
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', () => transformSelection(
         editTransform.mirrorY,
-        'Enter Y-coordinate to reflect across.'
+        getMirrorPrompt('Y')
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Clockwise', () => transformSelection(
