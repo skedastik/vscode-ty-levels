@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Mirroring commands
     - Support reflection across arbitrary coordinates, not just the world origin (0,0,0). Prompt the user to enter the desired coordinate.
+- Rotation commands
+    - Support rotation around arbitrary coordinates, not just the world origin (0,0,0). Prompt the user to enter the desired center of rotation.
+- `node-ty-levels` NPM package
+    - Expose translation functions.
 
 ## [0.0.17] - 2025.03.15
 

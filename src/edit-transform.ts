@@ -88,15 +88,3 @@ export const rotate90Counterclockwise = (text: string, x: string, z: string) => 
 
 export const set = (text: string, valueExpr: string, param: string, filter?: string) => newParamSetTransform(param, filter).apply(text, valueExpr);
 export const setOnEtag = (text: string, valueExpr: string, param: string, etag: string) => applyParamToEtag(text, param, valueExpr, etag);
-
-// these edits can be applied via auto-edit tags
-export const automatable = {
-    translateX,
-    translateZ,
-    translateY,
-    mirrorZ,
-    mirrorX,
-    mirrorY,
-    rotate90Clockwise,
-    rotate90Counterclockwise
-};
