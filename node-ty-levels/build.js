@@ -3,7 +3,7 @@ const esbuild = require('esbuild');
 
 esbuild.build({
     entryPoints: [
-        '../src/edit-transform.ts'
+        'index.ts'
     ],
     outfile: 'dist/bundle.js',
     bundle: true,

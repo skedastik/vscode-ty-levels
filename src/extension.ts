@@ -30,7 +30,9 @@ const editSelection = async (edit: stringEdit) => {
 };
 
 let lastInputValue: string = '';
-const TRANSLATE_PROMPT = 'Enter translation expression. Example: "-2" or "2 * myVar"';
+const getTranslatePrompt = () => 'Enter translation expression. Example: "-2" or "2 * myVar"';
+const getMirrorPrompt = (coord: string) => `Enter ${coord}-coordinate to reflect across.`;
+const getRotatePrompt = () => 'Enter center of rotation. Example: "0,0"';
 
 type transformEdit = (text: string, transformExpr: string, ...args: string[]) => string;
 type argSplitter = (argString: string) => string[];
@@ -183,37 +185,56 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', () => transformSelection(
         editTransform.translateX,
-        TRANSLATE_PROMPT
+        getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', () => transformSelection(
         editTransform.translateZ,
-        TRANSLATE_PROMPT
+        getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', () => transformSelection(
         editTransform.translateY,
-        TRANSLATE_PROMPT
+        getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', () => transformSelection(
-        editTransform.mirrorX
+        editTransform.mirrorX,
+        getMirrorPrompt('Z')
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', () => transformSelection(
-        editTransform.mirrorZ
+        editTransform.mirrorZ,
+        getMirrorPrompt('X')
     )));
     
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', () => transformSelection(
-        editTransform.mirrorY
+        editTransform.mirrorY,
+        getMirrorPrompt('Y')
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Clockwise', () => transformSelection(
-        editTransform.rotate90Clockwise
+        editTransform.rotate90Clockwise,
+        getRotatePrompt(),
+        (argString) => {
+            let args = argString.split(',');
+            if (args.length < 2) {
+                throw new UserError('Invalid input. Expected at least two comma-separated arguments.');
+            }
+            return args;
+        }
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Counterclockwise', () => transformSelection(
-        editTransform.rotate90Counterclockwise
+        editTransform.rotate90Counterclockwise,
+        getRotatePrompt(),
+        (argString) => {
+            let args = argString.split(',');
+            if (args.length < 2) {
+                throw new UserError('Invalid input. Expected at least two comma-separated arguments.');
+            }
+            return args;
+        }
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.setParam', () => transformSelection(

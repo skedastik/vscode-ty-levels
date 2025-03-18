@@ -7,8 +7,12 @@ import {
 
 import { UserError } from './error';
 
-const additionOperation = (currentExpr: string, transformExpr: string) => `${currentExpr} + (${transformExpr})`;
-const multiplicationOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) * (${transformExpr})`;
+const additionOperation = (currentExpr: string, transformExpr: string) => {
+    if (transformExpr === '') {
+        throw new UserError('Missing argument.');
+    }
+    return `${currentExpr} + (${transformExpr})`;
+};
 const angleMirrorZOperation = (currentExpr: string) => {
     let angle = Number.parseFloat(currentExpr);
     if (Number.isNaN(angle)) {
@@ -38,6 +42,15 @@ const angleMirrorYRampOperation = (currentExpr: string) => {
     }
     return currentExpr;
 };
+const coordMirrorOperation = (currentExpr: string, transformExpr: string) => {
+    if (transformExpr === '') {
+        transformExpr = '0';
+    }
+    if (Number.isNaN(Number.parseFloat(transformExpr))) {
+        throw new UserError('Coordinate must be numeric.');
+    }
+    return `2 * (${transformExpr}) - (${currentExpr})`;
+};
 
 const setOperation = (currentExpr: string, transformExpr: string) => transformExpr;
 
@@ -49,33 +62,29 @@ const angleAttributes = ['angle'];
 const xAdd = new Transform(xAttributes, additionOperation);
 const zAdd = new Transform(zAttributes, additionOperation);
 const yAdd = new Transform(yAttributes, additionOperation);
-const xMultiply = new Transform(xAttributes, multiplicationOperation);
-const zMultiply = new Transform(zAttributes, multiplicationOperation);
-const yMultiply = new Transform(yAttributes, multiplicationOperation);
 const angleMirrorZ = new Transform(angleAttributes, angleMirrorZOperation, false);
 const angleMirrorX = new Transform(angleAttributes, angleMirrorXOperation, false);
 const angleMirrorYRamps = new Transform(angleAttributes, angleMirrorYRampOperation, false, 'Ramp');
-const clockwise90Rotation = new Rotation90Clockwise();
-const counterclockwise90Rotation = new Rotation90Counterclockwise();
+const coordMirrorZ = new Transform(xAttributes, coordMirrorOperation);
+const coordMirrorX = new Transform(zAttributes, coordMirrorOperation);
+const coordMirrorY = new Transform(yAttributes, coordMirrorOperation);
+const newClockwise90Rotation = (x: string, z: string) => new Rotation90Clockwise(x, z);
+const newCounterclockwise90Rotation = (x: string, z: string) => new Rotation90Counterclockwise(x, z);
 const newParamSetTransform = (param: string, filter?: string) => new Transform([param], setOperation, true, filter);
+
+const compose = (...transforms: Transform[]) => (text: string, transformExpr: string) => transforms.reduceRight(
+    (acc, transform) => transform.apply(acc, transformExpr),
+    text
+);
 
 export const translateX = (text: string, transformExpr: string) => xAdd.apply(text, transformExpr);
 export const translateZ = (text: string, transformExpr: string) => zAdd.apply(text, transformExpr);
 export const translateY = (text: string, transformExpr: string) => yAdd.apply(text, transformExpr);
-export const mirrorZ = (text: string) => xMultiply.apply(angleMirrorZ.apply(text), '-1');
-export const mirrorX = (text: string) => zMultiply.apply(angleMirrorX.apply(text), '-1');
-export const mirrorY = (text: string) => yMultiply.apply(angleMirrorYRamps.apply(text), '-1');
-export const rotate90Clockwise = (text: string) => clockwise90Rotation.apply(text);
-export const rotate90Counterclockwise = (text: string) => counterclockwise90Rotation.apply(text);
+export const mirrorX = compose(coordMirrorX, angleMirrorX);
+export const mirrorZ = compose(coordMirrorZ, angleMirrorZ);
+export const mirrorY = compose(coordMirrorY, angleMirrorYRamps);
+export const rotate90Clockwise = (text: string, x: string, z: string) => newClockwise90Rotation(x, z).apply(text);
+export const rotate90Counterclockwise = (text: string, x: string, z: string) => newCounterclockwise90Rotation(x, z).apply(text);
 
 export const set = (text: string, valueExpr: string, param: string, filter?: string) => newParamSetTransform(param, filter).apply(text, valueExpr);
 export const setOnEtag = (text: string, valueExpr: string, param: string, etag: string) => applyParamToEtag(text, param, valueExpr, etag);
-
-// these edits can be applied via auto-edit tags
-export const automatable = {
-    mirrorZ,
-    mirrorX,
-    mirrorY,
-    rotate90Clockwise,
-    rotate90Counterclockwise
-};
