@@ -46,7 +46,7 @@ Reflect **y/yy** and ramp **angle** attributes across the Y axis. The **angle** 
 
 #### Rotation
 
-Rotate elements around the world origin (0,0,0). This affects the following attributes: **cx, x, xx, cz, z, zz, w, d, angle**.
+You will be prompted to enter a center of rotation (x,z). Elements will be rotated around the specified point. This affects the following attributes: **cx, x, xx, cz, z, zz, w, d, angle**.
 
 ⚠️ Rotation commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
 
