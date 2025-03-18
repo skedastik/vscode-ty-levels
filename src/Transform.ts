@@ -2,6 +2,7 @@ const math = require('mathjs');
 const crypto = require('crypto');
 import * as alf from './alf-regex';
 import { UserError } from './error';
+import { isNumericString } from './util';
 
 type symbolToTokenMap = { [key: string]: string };
 
@@ -165,7 +166,7 @@ export class Transform {
         }
         const encodedExpr = this.encoder ? this.encoder.encode(expr) : expr;
         const appliedExpr = this.operation(encodedExpr, transformExpr);
-        const simplifiedExpr = this.simplifyExpressions ? simplify(appliedExpr) : appliedExpr;
+        const simplifiedExpr = this.simplifyExpressions && !isNumericString(appliedExpr) ? simplify(appliedExpr) : appliedExpr;
         const replacementString = [t1, simplifiedExpr, t2].join('');
 
         if (process.env.VSCODE_DEBUG_MODE) {
@@ -198,7 +199,7 @@ class Rotation90 {
     #regexSpecificMacro: RegExp;
 
     constructor(x: string = '0', z: string = '0') {
-        if (Number.isNaN(Number.parseFloat(x)) || Number.isNaN(Number.parseFloat(z))) {
+        if (!isNumericString(x) || !isNumericString(z)) {
             throw new UserError('Center of rotation coordinates must be numeric.');
         }
         this.x = x;
@@ -223,7 +224,7 @@ class Rotation90 {
         };
 
         const encoder = new ExpressionEncoder();
-        const encodeSimplifyDecode = (expr: string) => encoder.decode(simplify(encoder.encode(expr)));
+        const encodeSimplifyDecode = (expr: string) => !isNumericString(expr) ? encoder.decode(simplify(encoder.encode(expr))) : expr;
 
         // 1. convert to center-dimensions definition (x,z,w,d)
 
@@ -387,7 +388,7 @@ export const applyParamToEtag = (text: string, param: string, expr: string, etag
     let didUpdate = false;
 
     const encoder = new ExpressionEncoder();
-    const simplifiedExpr = encoder.decode(simplify(encoder.encode(expr)));
+    const simplifiedExpr = !isNumericString(expr) ? encoder.decode(simplify(encoder.encode(expr))) : expr;
 
     const appliedText = text
         .replace(regexTag, (match: string) => {
