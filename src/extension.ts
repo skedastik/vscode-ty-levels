@@ -197,15 +197,18 @@ export function activate(context: vscode.ExtensionContext) {
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', () => transformSelection(
-        editTransform.mirrorX
+        editTransform.mirrorX,
+        'Enter X-coordinate to reflect across.'
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', () => transformSelection(
-        editTransform.mirrorZ
+        editTransform.mirrorZ,
+        'Enter Z-coordinate to reflect across.'
     )));
     
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', () => transformSelection(
-        editTransform.mirrorY
+        editTransform.mirrorY,
+        'Enter Y-coordinate to reflect across.'
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Clockwise', () => transformSelection(

@@ -8,7 +8,6 @@ import {
 import { UserError } from './error';
 
 const additionOperation = (currentExpr: string, transformExpr: string) => `${currentExpr} + (${transformExpr})`;
-const multiplicationOperation = (currentExpr: string, transformExpr: string) => `(${currentExpr}) * (${transformExpr})`;
 const angleMirrorZOperation = (currentExpr: string) => {
     let angle = Number.parseFloat(currentExpr);
     if (Number.isNaN(angle)) {
@@ -38,11 +37,11 @@ const angleMirrorYRampOperation = (currentExpr: string) => {
     }
     return currentExpr;
 };
-const coordMirrorOperation = (currentExpr: string /*, transformExpr: string */) => {
-    /* if (Number.isNaN(Number.parseFloat(transformExpr))) {
-        throw new UserError('Value must be numeric.');
-    } */
-    return `(${currentExpr}) * -1`;
+const coordMirrorOperation = (currentExpr: string, transformExpr: string) => {
+    if (Number.isNaN(Number.parseFloat(transformExpr))) {
+        throw new UserError('Coordinate must be numeric.');
+    }
+    return `2 * (${transformExpr}) - (${currentExpr})`;
 };
 
 const setOperation = (currentExpr: string, transformExpr: string) => transformExpr;
@@ -65,14 +64,17 @@ const clockwise90Rotation = new Rotation90Clockwise();
 const counterclockwise90Rotation = new Rotation90Counterclockwise();
 const newParamSetTransform = (param: string, filter?: string) => new Transform([param], setOperation, true, filter);
 
-const compose = (...transforms: Transform[]) => (text: string) => transforms.reduceRight((acc, transform) => transform.apply(acc), text);
+const compose = (...transforms: Transform[]) => (text: string, transformExpr: string) => transforms.reduceRight(
+    (acc, transform) => transform.apply(acc, transformExpr),
+    text
+);
 
 export const translateX = (text: string, transformExpr: string) => xAdd.apply(text, transformExpr);
 export const translateZ = (text: string, transformExpr: string) => zAdd.apply(text, transformExpr);
 export const translateY = (text: string, transformExpr: string) => yAdd.apply(text, transformExpr);
-export const mirrorX = /* (text: string, x: string) => */ compose(coordMirrorX, angleMirrorX);
-export const mirrorZ = /* (text: string, z: string) => */ compose(coordMirrorZ, angleMirrorZ);
-export const mirrorY = /* (text: string, y: string) => */ compose(coordMirrorY, angleMirrorYRamps);
+export const mirrorX = compose(coordMirrorX, angleMirrorX);
+export const mirrorZ = compose(coordMirrorZ, angleMirrorZ);
+export const mirrorY = compose(coordMirrorY, angleMirrorYRamps);
 export const rotate90Clockwise = (text: string) => clockwise90Rotation.apply(text);
 export const rotate90Counterclockwise = (text: string) => counterclockwise90Rotation.apply(text);
 

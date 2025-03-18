@@ -26,23 +26,23 @@ Add to **cz/z/zz** attributes.
 
 Add to **y/yy** attributes.
 
-#### Mirroring
+#### Reflection
 
-Mirror elements across axes centered at the world origin (0,0,0).
+You will be prompted to enter a coordinate. Elements will be reflected across the axis at the given coordinate.
 
 ⚠️ Mirroring commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
 
 ##### `Mirror Across X Axis`
 
-Multiply **cz/z/zz** attributes by -1. Reflect **angle** attributes across the X axis.
+Reflect **cz/z/zz** and **angle** attributes across the X axis.
 
 ##### `Mirror Across Z Axis`
 
-Multiply **cx/x/xx** attributes by -1. Reflect **angle** attributes across the Z axis.
+Reflect **cx/x/xx** and **angle** attributes across the Z axis.
 
 ##### `Mirror Across Y Axis`
 
-Multiply **y/yy** attributes by -1. Reflect ramp **angle** attributes across the Y axis. The **angle** attribute for elements other than ramps are unaffected.
+Reflect **y/yy** and ramp **angle** attributes across the Y axis. The **angle** attribute for elements other than ramps is unaffected.
 
 #### Rotation
 
