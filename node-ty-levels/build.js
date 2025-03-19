@@ -10,5 +10,8 @@ esbuild.build({
     platform: 'node',
     format: 'cjs',
     minify: true,
-    sourcemap: true
+    sourcemap: true,
+    external: [
+        'mathjs'
+    ]
 }).catch(() => process.exit(1));
