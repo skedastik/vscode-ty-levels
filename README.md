@@ -30,7 +30,7 @@ Add to **y/yy** attributes.
 
 You will be prompted to enter a coordinate. Elements will be reflected across the axis at the given coordinate.
 
-⚠️ Mirroring commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
+Mirroring commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
 
 ##### `Mirror Across X Axis`
 
@@ -48,7 +48,7 @@ Reflect **y/yy** and ramp **angle** attributes across the Y plane. The **angle**
 
 You will be prompted to enter a center of rotation (x,z). Elements will be rotated around the specified point. This affects the following attributes: **cx, x, xx, cz, z, zz, w, d, angle**.
 
-⚠️ Rotation commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
+Rotation commands do not support expressions in **angle** attributes. Non-numeric **angle** attributes will trigger an error.
 
 ##### `Rotate 90 Degrees Clockwise`
 
