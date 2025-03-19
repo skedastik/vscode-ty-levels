@@ -74,8 +74,8 @@ const coordMirrorX = new Transform(zAttributes, coordMirrorOperation, !NO_SIMPLI
 const coordMirrorY = new Transform(yAttributes, coordMirrorOperation, !NO_SIMPLIFY);
 const newClockwise90Rotation = (x: string, z: string) => new Rotation90Clockwise(x, z, !NO_SIMPLIFY);
 const newCounterclockwise90Rotation = (x: string, z: string) => new Rotation90Counterclockwise(x, z, !NO_SIMPLIFY);
-const newParamSetTransform = (param: string, filter?: string) => new Transform([param], setOperation, true, filter);
-// Simplify all attributes that are affected by any transform edit.
+const newParamSetTransform = (param: string, filter?: string) => new Transform([param], setOperation, !NO_SIMPLIFY, filter);
+// Simplify all attributes that are affected by any transform edit, irrespective of NO_SIMPLIFY env var.
 const simplifyExpressions = new Transform(
     xAttributes.concat(zAttributes, yAttributes, ['w', 'd']),
     (currentExpression) => currentExpression
