@@ -61,7 +61,7 @@ const yAttributes = ['y', 'yy'];
 const angleAttributes = ['angle'];
 
 // Avoid algebraic simplification if NO_SIMPLIFY env var is set
-const NO_SIMPLIFY = !!process.env.NO_SIMPLIFY || false;
+const NO_SIMPLIFY = !!process.env.NO_SIMPLIFY;
 
 const xAdd = new Transform(xAttributes, additionOperation, !NO_SIMPLIFY);
 const zAdd = new Transform(zAttributes, additionOperation, !NO_SIMPLIFY);
