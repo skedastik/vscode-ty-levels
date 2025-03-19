@@ -1,9 +1,9 @@
+import { tylConfig } from './config';
+
 const ETAG_LENGTH = 7;
 
 const AUTOTAG_STRING = 'autotag';
 const AUTOTAG_COMMENT = `<!-- ${AUTOTAG_STRING} -->`;
-
-import { tylConfig } from './config';
 
 export default class EtagEdit {
     #autotagIdentifiers: Set<string>;

@@ -4,7 +4,8 @@ import * as path from 'path';
 import { UserError } from './error';
 
 export type tylConfig = {
-    autotag?: string[]
+    autotag?: string[],
+    simplifyExpressions?: boolean
 }
 
 export type autoLoadCallbackFunction = (config: tylConfig) => void;
@@ -23,16 +24,17 @@ export class ConfigAutoLoader {
         this.#autoLoadCallback = autoLoadCallback;
     }
 
-    private static mergeConfig(config1: tylConfig, config2: tylConfig) {
-        const tagSet = new Set(config1.autotag);
-        if (config1.autotag) {
-            config1.autotag.forEach(item => tagSet.add(item));
+    private static mergeConfig(config: tylConfig, userConfig: tylConfig) {
+        const tagSet = new Set(config.autotag);
+        if (config.autotag) {
+            config.autotag.forEach(item => tagSet.add(item));
         }
-        if (config2.autotag) {
-            config2.autotag.forEach(item => tagSet.add(item));
+        if (userConfig.autotag) {
+            userConfig.autotag.forEach(item => tagSet.add(item));
         }
         return {
-            autotag: Array.from(tagSet)
+            autotag: Array.from(tagSet),
+            simplifyExpressions: userConfig.simplifyExpressions === undefined ? config.simplifyExpressions : userConfig.simplifyExpressions
         };
     };
 

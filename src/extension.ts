@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import EtagEdit from './EtagEdit';
-import * as editTransform from './edit-transform';
+import { TransformEdit, transformEditFunction } from './TransformEdit';
 import { ConfigAutoLoader, tylConfig } from './config';
 import { UserError } from './error';
 import { debounce } from './util';
@@ -34,7 +34,6 @@ const getTranslatePrompt = () => 'Enter translation expression. Example: "-2" or
 const getMirrorPrompt = (coord: string) => `Enter ${coord}-coordinate to reflect across.`;
 const getRotatePrompt = () => 'Enter center of rotation. Example: "0,0"';
 
-type transformEdit = (text: string, transformExpr: string, ...args: string[]) => string;
 type argSplitter = (argString: string) => string[];
 
 type commandParams = {
@@ -42,7 +41,7 @@ type commandParams = {
 }
 
 // Transform (translate/mirror etc.) elements
-const transformSelection = async (edit: transformEdit, prompt?: string, splitter?: argSplitter) => {
+const transformSelection = async (edit: transformEditFunction, prompt?: string, splitter?: argSplitter) => {
     try {
         let expr = '';
         let args: string[] = [];
@@ -79,6 +78,7 @@ const transformSelection = async (edit: transformEdit, prompt?: string, splitter
 
 export function activate(context: vscode.ExtensionContext) {
     const etagEdit = new EtagEdit();
+    const transformEdit = new TransformEdit();
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.addEtags', () => editSelection((text: string ) => etagEdit.addEtags(text))));
     context.subscriptions.push(vscode.commands.registerCommand('extension.removeEtags', () => editSelection((text: string ) => etagEdit.removeEtags(text))));
@@ -184,37 +184,37 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateX', () => transformSelection(
-        editTransform.translateX,
+        transformEdit.translateX,
         getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateZ', () => transformSelection(
-        editTransform.translateZ,
+        transformEdit.translateZ,
         getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.translateY', () => transformSelection(
-        editTransform.translateY,
+        transformEdit.translateY,
         getTranslatePrompt()
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorX', () => transformSelection(
-        editTransform.mirrorX,
+        transformEdit.mirrorX,
         getMirrorPrompt('Z')
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorZ', () => transformSelection(
-        editTransform.mirrorZ,
+        transformEdit.mirrorZ,
         getMirrorPrompt('X')
     )));
     
     context.subscriptions.push(vscode.commands.registerCommand('extension.mirrorY', () => transformSelection(
-        editTransform.mirrorY,
+        transformEdit.mirrorY,
         getMirrorPrompt('Y')
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Clockwise', () => transformSelection(
-        editTransform.rotate90Clockwise,
+        transformEdit.rotate90Clockwise,
         getRotatePrompt(),
         (argString) => {
             let args = argString.split(',');
@@ -226,7 +226,7 @@ export function activate(context: vscode.ExtensionContext) {
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.rotate90Counterclockwise', () => transformSelection(
-        editTransform.rotate90Counterclockwise,
+        transformEdit.rotate90Counterclockwise,
         getRotatePrompt(),
         (argString) => {
             let args = argString.split(',');
@@ -238,7 +238,7 @@ export function activate(context: vscode.ExtensionContext) {
     )));
 
     context.subscriptions.push(vscode.commands.registerCommand('extension.setParam', () => transformSelection(
-        (text: string, valueExpr: string, ...args: string[]) => editTransform.set(text, valueExpr, args[0], args[1]),
+        (text: string, valueExpr: string, ...args: string[]) => transformEdit.set(text, valueExpr, args[0], args[1]),
         'Enter: {<param>,<value>,<element(optional)>}. Examples: "w,5" or "shape,bspGrenade,Goody"',
         (argString) => {
             let args = argString.split(',');
@@ -260,7 +260,7 @@ export function activate(context: vscode.ExtensionContext) {
         delete commandParams.etag;
         await transformSelection((text: string) => {
             for (const param in commandParams) {
-                text = editTransform.setOnEtag(text, commandParams[param], param, etag);
+                text = transformEdit.setOnEtag(text, commandParams[param], param, etag);
             }
             return text;
         });
@@ -272,6 +272,7 @@ export function activate(context: vscode.ExtensionContext) {
         // debounce to avoid reading the config file too often
         debounce(async (config: tylConfig) => {
             etagEdit.configure(config);
+            transformEdit.configure(config);
         }, 500)
     );
     configAutoLoader.start();

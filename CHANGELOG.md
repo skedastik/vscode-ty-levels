@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Adjust algebraic simplification rules so that transformation commands produce less verbose attribute values.
 - `node-ty-levels` NPM package
-    - Respect `NO_SIMPLIFY` env var when executing transformation commands. When this env var is present, transformation commands will not perform algebraic simplification. You probably don't need to think about this, but it's mentioned here for completeness.
+    - Export `TransformEdit` class instead of individual functions. This provides a cleaner interface for configuring algebraic simplifications.
     - Don't bundle external dependencies unnecessarily. This significantly reduces package size.
 
 ## [0.0.19] - 2025.03.18

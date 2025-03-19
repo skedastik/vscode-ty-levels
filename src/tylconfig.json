@@ -20,5 +20,7 @@
         "Mine",
         "Parasite",
         "Ufo"
-    ]
+    ],
+    "_comment_simplifyExpressions": "If true, algebraic expressions in actor element attributes will be simplified.",
+    "simplifyExpressions": true
 }

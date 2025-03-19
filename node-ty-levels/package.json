@@ -6,7 +6,7 @@
         "type": "git",
         "url": "git+https://github.com/skedastik/vscode-ty-levels.git"
     },
-    "version": "0.0.6",
+    "version": "0.0.7",
     "engines": {
         "node": ">=16"
     },
