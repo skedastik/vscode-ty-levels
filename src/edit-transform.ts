@@ -60,18 +60,26 @@ const zAttributes = ['cz', 'z', 'zz'];
 const yAttributes = ['y', 'yy'];
 const angleAttributes = ['angle'];
 
-const xAdd = new Transform(xAttributes, additionOperation);
-const zAdd = new Transform(zAttributes, additionOperation);
-const yAdd = new Transform(yAttributes, additionOperation);
+// Avoid algebraic simplification if NO_SIMPLIFY env var is set
+const NO_SIMPLIFY = !!process.env.NO_SIMPLIFY || false;
+
+const xAdd = new Transform(xAttributes, additionOperation, !NO_SIMPLIFY);
+const zAdd = new Transform(zAttributes, additionOperation, !NO_SIMPLIFY);
+const yAdd = new Transform(yAttributes, additionOperation, !NO_SIMPLIFY);
 const angleMirrorZ = new Transform(angleAttributes, angleMirrorZOperation, false);
 const angleMirrorX = new Transform(angleAttributes, angleMirrorXOperation, false);
 const angleMirrorYRamps = new Transform(angleAttributes, angleMirrorYRampOperation, false, 'Ramp');
-const coordMirrorZ = new Transform(xAttributes, coordMirrorOperation);
-const coordMirrorX = new Transform(zAttributes, coordMirrorOperation);
-const coordMirrorY = new Transform(yAttributes, coordMirrorOperation);
-const newClockwise90Rotation = (x: string, z: string) => new Rotation90Clockwise(x, z);
-const newCounterclockwise90Rotation = (x: string, z: string) => new Rotation90Counterclockwise(x, z);
+const coordMirrorZ = new Transform(xAttributes, coordMirrorOperation, !NO_SIMPLIFY);
+const coordMirrorX = new Transform(zAttributes, coordMirrorOperation, !NO_SIMPLIFY);
+const coordMirrorY = new Transform(yAttributes, coordMirrorOperation, !NO_SIMPLIFY);
+const newClockwise90Rotation = (x: string, z: string) => new Rotation90Clockwise(x, z, !NO_SIMPLIFY);
+const newCounterclockwise90Rotation = (x: string, z: string) => new Rotation90Counterclockwise(x, z, !NO_SIMPLIFY);
 const newParamSetTransform = (param: string, filter?: string) => new Transform([param], setOperation, true, filter);
+// Simplify all attributes that are affected by any transform edit.
+const simplifyExpressions = new Transform(
+    xAttributes.concat(zAttributes, yAttributes, ['w', 'd']),
+    (currentExpression) => currentExpression
+);
 
 const compose = (...transforms: Transform[]) => (text: string, transformExpr: string) => transforms.reduceRight(
     (acc, transform) => transform.apply(acc, transformExpr),
@@ -89,3 +97,5 @@ export const rotate90Counterclockwise = (text: string, x: string, z: string) => 
 
 export const set = (text: string, valueExpr: string, param: string, filter?: string) => newParamSetTransform(param, filter).apply(text, valueExpr);
 export const setOnEtag = (text: string, valueExpr: string, param: string, etag: string) => applyParamToEtag(text, param, valueExpr, etag);
+
+export const simplify = (text: string) => simplifyExpressions.apply(text);

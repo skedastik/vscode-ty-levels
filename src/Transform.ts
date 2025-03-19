@@ -51,11 +51,11 @@ class ExpressionEncoder {
 type transformOperation = (currentExpr: string, transformExpr: string) => string;
 
 export const simplify = (expr: string) => {
-    const simplifiedExpr = math.simplify(expr, { exactFractions: false }).toString();
+    const simplifiedExpr = math.simplify(expr, {}, { exactFractions: false }).toString();
     if (simplifiedExpr.indexOf('^') !== -1) {
         // Just return the original expression if simplification yields
         // exponentiation since the exponent operator (^) is meaningless to
-        // Jinja, Python, and Avara's parser.
+        // Jinja's parser.
         return expr;
     }
     return simplifiedExpr;
@@ -195,15 +195,21 @@ interface placedActorAttributesNumeric {
 class Rotation90 {
     x: string;
     z: string;
+    #simplifyExpressions: boolean;
     #regexSpecificTag: RegExp;
     #regexSpecificMacro: RegExp;
 
-    constructor(x: string = '0', z: string = '0') {
+    constructor(
+        x: string = '0',
+        z: string = '0',
+        simplifyExpressions: boolean = true
+    ) {
         if (!isNumericString(x) || !isNumericString(z)) {
             throw new UserError('Center of rotation coordinates must be numeric.');
         }
         this.x = x;
         this.z = z;
+        this.#simplifyExpressions = simplifyExpressions;
         this.#regexSpecificTag = alf.getRegexForSpecificXmlTagAttributes(PLACED_ACTOR_ATTRIBUTES, alf.FILTER_ANY_ACTOR);
         this.#regexSpecificMacro = alf.getRegexForSpecificJinjaMacroParameters(PLACED_ACTOR_ATTRIBUTES, alf.FILTER_ANY_ACTOR);
     }
@@ -224,7 +230,7 @@ class Rotation90 {
         };
 
         const encoder = new ExpressionEncoder();
-        const encodeSimplifyDecode = (expr: string) => !isNumericString(expr) ? encoder.decode(simplify(encoder.encode(expr))) : expr;
+        const encodeSimplifyDecode = (expr: string) => this.#simplifyExpressions && !isNumericString(expr) ? encoder.decode(simplify(encoder.encode(expr))) : expr;
 
         // 1. convert to center-dimensions definition (x,z,w,d)
 
@@ -301,9 +307,6 @@ class Rotation90 {
     protected applyRotation(attributes: placedActorAttributesNumeric) {
         throw new Error('Rotation90ClockwiseDegrees.applyRotation -> Unimplemented.');
     }
-
-    // The below replacement implementations are very inefficient, but they
-    // reuse our existing regular expressions, so screw it.
 
     private replaceTag(tag: string) {
         const attributes: placedActorAttributes = {};
